@@ -1,1 +1,2 @@
 from .ParticularsAmplifierControl import ParticularsAmplifierControl
+from .BiasSupplyControl import BiasSupplyControl
