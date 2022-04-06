@@ -91,44 +91,51 @@ class BiasSupplyControl():
 
         self.smu.enableCurrentSense()
 
-        self.log("Bias-SMU", f"Configured SMU: (%f Voltage Range -- %f Current Compliance)"%(self.voltage_range, self.current_limit))
+        self.log("Bias-SMU", f"Configured SMU: ({self.voltage_range} Voltage Range -- {self.current_limit} Current Compliance)")
 
-    ## Control the Bias HV
-    # Implement save ramp up and ramp down
+    # Control the Bias HV
+    # Implement ramp up and ramp down
     def SMURampVoltage(self, voltage):
         if not (min(0, self.voltage_limit) <= voltage <= max(0, self.voltage_limit)):
-            self.log("Bias-SMU", f"Error: Set voltage [{voltage:.2f}V] out of range [%.2fV, %.2fV]"%(0, self.voltage_limit))
+            self.log("Bias-SMU", f"Error: Set voltage [{voltage:.2f}V] out of range [0V, {self.voltage_limit:.2f}V]")
             return False
 
-        current = self.smu.voltage()
+        if not self.smu.state():
+            if voltage != self.smu.voltage():
+                self.smu.setVoltage(voltage)
+                self.log("Bias-SMU", "Set voltage to %fV"%(voltage))
 
-        if voltage != current:
-            prev = time.time()
-            self.log("Bias-SMU", "Start bias ramp at %fV"%(current))
-            time.sleep(0.2)
-            while current != voltage:
-                delta = (time.time() - prev)*BiasSupplyControl.VOLTAGE_RAMP*np.sign(voltage - current)
-                if (current + delta) <= voltage and voltage <= current:
-                    current = voltage
-                elif (current + delta) >= voltage and voltage >= current:
-                    current = voltage
-                else:
-                    current = current + delta
+        else:
+            current = self.smu.voltage()
 
-                self.smu.setVoltage(current)
+            if voltage != current:
+                prev = time.time()
+                self.log("Bias-SMU", "Start bias ramp at %fV"%(current))
+                time.sleep(0.2)
+                while current != voltage:
+                    delta = (time.time() - prev)*BiasSupplyControl.VOLTAGE_RAMP*np.sign(voltage - current)
+                    if (current + delta) <= voltage and voltage <= current:
+                        current = voltage
+                    elif (current + delta) >= voltage and voltage >= current:
+                        current = voltage
+                    else:
+                        current = current + delta
 
-            self.log("Bias-SMU", "Ramp bias to %fV"%(voltage))
+                    self.smu.setVoltage(current)
+
+                self.log("Bias-SMU", "Ramp bias to %fV"%(voltage))
+
+        return True
 
     def SMUOn(self):
         voltage = self.smu.voltage()
         self.smu.setVoltage(0)
 
         self.smu.on()
-        # self._continousReading()
         self.log("Bias-SMU", "Turn SMU on")
 
         # Ramp voltage up to set value
-        self.SMURampVoltage(voltage)
+        return self.SMURampVoltage(voltage)
 
     def SMUOff(self):
         # Ramp voltage down to 0
@@ -137,17 +144,20 @@ class BiasSupplyControl():
         self.smu.off()
         self.log("Bias-SMU", "Turn SMU off")
 
+        return True
+
     def SMUState(self):
         return self.smu.state()
 
     def SMUVoltage(self):
         return self.smu.voltage()
 
-    ## Measure currents
     def SMUCurrent(self):
         if not self.smu.state():
             return None
 
+
+        # Trigger one current measurement
         self.smu.setArmCount(1)
         self.smu.init()
 
