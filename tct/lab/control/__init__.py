@@ -1,3 +1,4 @@
 from .ParticularsAmplifierControl import ParticularsAmplifierControl
 from .BiasSupplyControl import BiasSupplyControl
 from .ParticularsLaserControl import ParticularsLaserControl
+from .StageControl import StageControl
