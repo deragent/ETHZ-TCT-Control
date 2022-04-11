@@ -2,7 +2,7 @@ from ..Particulars import LaserLA01
 
 class ParticularsLaserControl():
 
-    def __init__(self, frequency=1000, dac=300, log=None):
+    def __init__(self, frequency=None, dac=None, log=None):
         self.laser = LaserLA01(log=log)
         self._log = log
 
@@ -18,17 +18,20 @@ class ParticularsLaserControl():
             self._log.log(cat, msg)
 
     def setup(self, frequency, dac):
-        if dac < 0 or dac >= 1024:
-            dac = 300
-        if frequency < 50 or frequency > 100e3:
-            frequency = 1000
+        if dac is not None:
+            if dac < 0 or dac >= 1024:
+                dac = 300
+            self.laser.setDAC(dac)
 
-        self.laser.off()
+            self.log("Laser", f"Configured the laser DAC to {int(dac)}.")
 
-        self.laser.setFrequency(frequency)
-        self.laser.setDAC(dac)
+        if frequency is not None:
+            if frequency < 50 or frequency > 100e3:
+                frequency = 1000
 
-        self.log("Laser", f"Laser configured (Off - {frequency/1000:0.0f} kHz - {int(dac)} DAC)")
+            self.laser.setFrequency(frequency)
+
+            self.log("Laser", f"Configured the laser frequency to {frequency/1000:0.0f}kHz.")
 
     def LaserOn(self):
         self.laser.on()

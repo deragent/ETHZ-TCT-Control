@@ -12,18 +12,25 @@ class LaserLA01(InterfaceHIDParticulars):
         super().__init__(vendor, product, log=log)
 
         # We only have a local state, as for now the frequency and dac can not be read from the laser!
-        self._frequency = 50
-        self._dac = 1024
+        self._frequency = None
+        self._dac = None
 
     def on(self):
+        if self._frequency is None or  self._dac is None:
+            return False
+
         self._sendDAC(self._dac)
         self._sendFrequency(self._frequency)
 
         self.send(bytes([91])) # Corresponds to 'Hardware Sequence Enable'
 
+        return True
+
     def off(self):
         self.send(bytes([90])) # Corresponds to 'Hardware Sequence Disable'
         self.send(bytes([4]))
+
+        return True
 
     def state(self):
         return self.read()[LaserLA01.STATUS_BYTE] == 1
