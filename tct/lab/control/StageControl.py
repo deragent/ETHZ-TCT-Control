@@ -89,6 +89,8 @@ class StageControl():
 
 
     def DoHome(self):
+        self.log('StageControl', f'Start home sequence.')
+
         for ax, stage in self.stages.items():
             stage.doHome(blocking=False)
 
