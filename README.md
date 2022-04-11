@@ -37,3 +37,4 @@ This framework only works with python 3.7 or higher.
 - matplotlib
 - plotly
 - pyserial
+- prompt_toolki
