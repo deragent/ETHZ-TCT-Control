@@ -59,8 +59,8 @@ class Ximc8SMC5USB():
         status = self._getStatus()
 
         data = {
-            'home': (status.Flags & pyximc.StateFlags.STATE_IS_HOMED > 0),
-            'position': status.CurPosition + status.uCurPosition / self.usteps,
+            'is_homed': (status.Flags & pyximc.StateFlags.STATE_IS_HOMED > 0),
+            'step': status.CurPosition + status.uCurPosition / self.usteps,
             'current': status.Ipwr*1e-3,
             'voltage': status.Upwr*1e-3,
             'temperature': status.CurT*1e-1,

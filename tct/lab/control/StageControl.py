@@ -169,3 +169,10 @@ class StageControl():
             data[ax] = StageControl.STEPS2MM(stage.position())
 
         return data
+
+    def StageStatus(self):
+        data = {}
+        for ax, stage in self.stages.items():
+            data[ax] = stage.status()
+
+        return data
