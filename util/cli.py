@@ -67,14 +67,23 @@ def handleLaser(input):
         laser.LaserOff()
     elif input[0] in ['state']:
         print('= ', laser.LaserState())
-    elif input[0] in ['dac', 'frequency', 'freq']:
+    elif input[0] in ['dac']:
         if len(input) < 2:
-            printError('Missing arguments!')
-            return
-
-        if input[0] in ['dac']:
+            dac = laser.LaserGetDAC()
+            if dac is not None:
+                print(f'= {dac}')
+            else:
+                print('= NA')
+        else:
             laser.LaserSetDAC(int(input[1]))
-        elif input[0] in ['frequency', 'freq']:
+    elif input[0] in ['frequency', 'freq']:
+        if len(input) < 2:
+            freq = laser.LaserGetFrequency()
+            if freq is not None:
+                print(f'= {freq/1000:.2f} kHz')
+            else:
+                print('= NA')
+        else:
             laser.LaserSetFrequency(int(float(input[1])))
 
 def handleAmp(input):
@@ -86,7 +95,7 @@ def handleAmp(input):
         print('= ', amp.AmpState())
     elif input[0] in ['gain']:
         if len(input) < 2:
-            print(f'= {amp.AmpGet():.2f}%')
+            print(f'= {amp.AmpGet():.2f} %')
         else:
             amp.AmpSet(float(input[1]))
 
