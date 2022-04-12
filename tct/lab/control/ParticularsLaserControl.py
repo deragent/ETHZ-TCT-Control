@@ -42,7 +42,7 @@ class ParticularsLaserControl():
         self.log("Laser", f"Turned the laser off.")
 
     def LaserState(self):
-        return self.laster.state()
+        return self.laser.state()
 
 
     def LaserSetFrequency(self, frequency):

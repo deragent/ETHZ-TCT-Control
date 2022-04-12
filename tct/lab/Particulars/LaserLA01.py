@@ -16,7 +16,7 @@ class LaserLA01(InterfaceHIDParticulars):
         self._dac = None
 
     def on(self):
-        if self._frequency is None or  self._dac is None:
+        if self._frequency is None or self._dac is None:
             return False
 
         self._sendDAC(self._dac)
