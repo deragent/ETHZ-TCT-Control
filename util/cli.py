@@ -100,7 +100,25 @@ def handleAmp(input):
             amp.AmpSet(float(input[1]))
 
 def handleBias(input):
-    pass
+    pass # TODO
+
+
+def _parsePosition(input):
+    pos = {}
+
+    if len(input) < 2:
+        printError('Missing arguments!')
+
+    if input[0] in ['x', 'y', 'z']:
+        pos[input[0]] = float(input[1])
+    elif len(input) >= 3:
+        pos['x'] = float(input[0])
+        pos['y'] = float(input[1])
+        pos['z'] = float(input[2])
+    else:
+        printError('Missing arguments!')
+
+    return pos
 
 def handleStage(input):
     if input[0] in ['home']:
@@ -112,10 +130,21 @@ def handleStage(input):
             stage.DoHome()
 
     elif input[0] in ['move']:
-        pass # TODO
+        delta = _parsePosition(input[1:])
+        if delta is None:
+            printError('Missing movement!')
+
+        current = stage.Position()
+        pos = {ax: delta[ax] + current[ax] for ax in delta}
+
+        stage.MoveTo(**pos)
 
     elif input[0] in ['go', 'goto']:
-        pass # TODO
+        pos = _parsePosition(input[1:])
+        if pos is None:
+            printError('Missing position!')
+
+        stage.MoveTo(**pos)
 
     elif input[0] in ['pos', 'position']:
         positions = stage.Position()
@@ -131,7 +160,7 @@ def handleStage(input):
 
 
 def handleScope(input):
-    pass
+    pass # TODO
 
 
 
