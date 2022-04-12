@@ -1,6 +1,6 @@
 import prompt_toolkit as pt
 
-from tct.lab.control import StageControl, ParticularsLaserControl
+from tct.lab.control import *
 
 from tct.logger import Logger
 log = Logger('.tct_cli.log', print=True, debug=False)
@@ -53,7 +53,8 @@ def printWarning(msg):
 
 ## TODO setup the environment
 stage = StageControl(log = log)
-laser = ParticularsLaserControl(log=log)
+laser = ParticularsLaserControl(log = log)
+amp = ParticularsAmplifierControl(log = log)
 
 
 ## TODO add status rprompt
@@ -77,7 +78,17 @@ def handleLaser(input):
             laser.LaserSetFrequency(int(float(input[1])))
 
 def handleAmp(input):
-    pass
+    if input[0] in ['on']:
+        amp.AmpOn()
+    elif input[0] in ['off']:
+        amp.AmpOff()
+    elif input[0] in ['state']:
+        print('= ', amp.AmpState())
+    elif input[0] in ['gain']:
+        if len(input) < 2:
+            print(f'= {amp.AmpGet():.2f}%')
+        else:
+            amp.AmpSet(float(input[1]))
 
 def handleBias(input):
     pass
