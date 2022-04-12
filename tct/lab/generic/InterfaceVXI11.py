@@ -41,14 +41,16 @@ class InterfaceVXI11():
     def close(self):
         self._closeVXI11()
 
-
-    def query(self, cmd, resp=False, len=None):
+    def query(self, cmd, resp=False, len=None, raw=False):
         """
         Sends a command to the instrument and receives data if needed.
         """
 
         if resp:
-            return self.conn.ask(cmd)
+            if raw:
+                return self.conn.ask_raw(cmd.encode())
+            else:
+                return self.conn.ask(cmd)
         else:
             self.conn.write(cmd)
 
