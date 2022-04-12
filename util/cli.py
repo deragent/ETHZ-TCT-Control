@@ -1,9 +1,42 @@
+# Inspired by: https://opensource.com/article/17/5/4-practical-python-libraries
+
 import prompt_toolkit as pt
+import argparse
+import sys
+
+import numpy as np
 
 from tct.lab.control import *
-
 from tct.logger import Logger
+
+
+def printError(msg):
+    pt.print_formatted_text(pt.HTML(f'<ansibrightred>ERROR: {msg}!</ansibrightred>'))
+def printWarning(msg):
+    pt.print_formatted_text(pt.HTML(f'<ansiyellow>WARNING: {msg}!</ansiyellow>'))
+
+
+# Parse the command line arguments
+parser = argparse.ArgumentParser(description='Command-Line Interface (CLI) for the TCT Setup')
+parser.add_argument('--vlimit', '-V', type=float, required=True,
+                    help='Voltage limit for the high-voltage PSU [V].')
+parser.add_argument('--ilimit', '-I', type=float, required=True,
+                    help='Current limit for the high-voltage PSU [mA].')
+
+args = parser.parse_args()
+
+if np.abs(args.vlimit) > 1000:
+    printError('|V-Limit| must be smaller than 1kV!')
+    sys.exit(-1)
+
+if np.abs(args.ilimit) > 20:
+    printError('|I-Limit| must be smaller than 20mA!')
+    sys.exit(-1)
+
+
+# Create a logger
 log = Logger('.tct_cli.log', print=True, debug=False)
+
 
 command_completer = pt.completion.NestedCompleter.from_nested_dict({
     'laser': {
@@ -41,20 +74,11 @@ command_completer = pt.completion.NestedCompleter.from_nested_dict({
     'quit': None,
 })
 
-def printError(msg):
-    pt.print_formatted_text(pt.HTML(f'<ansibrightred>ERROR: {msg}!</ansibrightred>'))
-def printWarning(msg):
-    pt.print_formatted_text(pt.HTML(f'<ansiyellow>WARNING: {msg}!</ansiyellow>'))
-
-
-## TODO parse command line arguments
-## - safe mode
-## - HV bias limits
-
-## TODO setup the environment
+## Setup the environment
 stage = StageControl(log = log)
 laser = ParticularsLaserControl(log = log)
 amp = ParticularsAmplifierControl(log = log)
+bias = BiasSupplyControl(VLimit = args.vlimit, ILimit = args.ilimit*1e-3, log = log)
 
 
 ## TODO add status rprompt
@@ -100,7 +124,23 @@ def handleAmp(input):
             amp.AmpSet(float(input[1]))
 
 def handleBias(input):
-    pass # TODO
+    if input[0] in ['on']:
+        bias.SMUOn()
+    elif input[0] in ['off']:
+        bias.SMUOff()
+    elif input[0] in ['state']:
+        print('= ', bias.SMUState())
+    elif input[0] in ['current', 'curr', 'cur', 'c']:
+        current = bias.SMUCurrent()
+        if current is not None:
+            print(f'= {current*1e6:.3f} uA')
+        else:
+            print('= NA')
+    elif input[0] in ['voltage', 'volt', 'v']:
+        if len(input) < 2:
+            print(f'= {bias.SMUVoltage():.3f} V')
+        else:
+            bias.SMURampVoltage(float(input[1]))
 
 
 def _parsePosition(input):
