@@ -70,6 +70,7 @@ command_completer = pt.completion.NestedCompleter.from_nested_dict({
         'position': None,
         'state': None,
     },
+    'off': None,
     'exit': None,
     'quit': None,
 })
@@ -222,6 +223,17 @@ while 1:
 
     if commands[0] in ['quit', 'exit']:
         break
+    elif commands[0] in ['off']:
+        result = pt.shortcuts.yes_no_dialog(
+            title='System Off',
+            text='Do you want to turn all components off?'
+        ).run()
+        if result:
+            laser.LaserOff()
+            bias.SMUOff()
+            amp.AmpOff()
+
+        continue
 
     if len(commands) < 2:
         printError('Missing arguments!')
