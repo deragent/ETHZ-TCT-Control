@@ -65,7 +65,7 @@ class ScopeControl():
             sweeps = self.scope.GetSweeps(self.CH)
             if sweeps >= num_average:
                 break
-            time.sleep(0.1)
+            time.sleep(0.01)
 
         return self._readWaveform()
 

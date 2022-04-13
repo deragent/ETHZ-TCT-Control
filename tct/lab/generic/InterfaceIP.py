@@ -93,7 +93,7 @@ class InterfaceIP:
             self.log.sent(cmd)
             #Send cmd string
             self.sock.sendall(cmd.encode() + b'\n')
-            time.sleep(0.2)
+            time.sleep(0.02)
         except socket.error:
             error = self.CommError(self, 'Failed to send', op=cmd)
             self.log.error(str(error))

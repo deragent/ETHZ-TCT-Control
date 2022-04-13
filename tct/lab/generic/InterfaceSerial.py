@@ -68,7 +68,7 @@ class InterfaceSerial:
         self.log.sent(cmd)
         #Send cmd string
         self._if.write(cmd.encode() + self.line_end)
-        time.sleep(0.2)
+        time.sleep(0.02)
 
         if resp:
             reply = self._if.read_until(self.line_end)
