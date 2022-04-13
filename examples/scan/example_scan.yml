@@ -1,0 +1,51 @@
+meta:
+  name: 'Name of this scan'
+  description: 'Longer description with details'
+  operator: 'Johannes Wüthrich'
+  laser: 'Particulars 660nm'
+  aperture: 'Fully Open'
+  sample: 'E2'
+  wafer: 'P301401'
+  side: 'P-Side'
+
+limits:
+  voltage: 1000
+  current: 0.002
+
+scope:
+  average: 100
+
+# Scope alternative:
+# scope:
+#   single: 30
+
+
+setup:
+  gain: 50
+  hv: 0
+  x: 0.9
+  y: -1.6
+  focus: 78.2
+  frequency: 50e3
+  dac: 290
+
+end: off
+
+# End alternative
+# end:
+#   gain: 50
+#   hv: 0
+#   position: [0.9, -1.6]
+#   focus: 78.2
+#   frequency: 50e3
+#   dac: 290
+
+scan:
+  - hv: [10, 20, 50, 80, 120]
+  - focus: lin(77.8, 78.8, 21)
+  - x: lin(0.3, 0.6, 21)
+
+analysis:
+  x: x
+  y: integral
+  group: z

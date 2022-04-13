@@ -39,3 +39,5 @@ This framework only works with python 3.7 or higher.
 - pyserial
 - prompt_toolkit
 - lecroyparser
+- pandas
+- pyyaml
