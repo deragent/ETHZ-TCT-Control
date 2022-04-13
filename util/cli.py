@@ -234,6 +234,16 @@ while 1:
             amp.AmpOff()
 
         continue
+    elif commands[0] in ['on']:
+        if laser.LaserGetFrequency() is None:
+            laser.LaserSetFrequency(50e3)
+        if laser.LaserGetDAC() is None:
+            laser.LaserSetDAC(290)
+        laser.LaserOn()
+        amp.AmpOn()
+        bias.SMUOn()
+
+        continue
 
     if len(commands) < 2:
         printError('Missing arguments!')
