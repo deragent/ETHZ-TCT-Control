@@ -111,9 +111,13 @@ class BiasSupplyControl():
             if voltage != current:
                 prev = time.time()
                 self.log("Bias-SMU", "Start bias ramp at %fV"%(current))
-                time.sleep(0.2)
+
                 while current != voltage:
+                    time.sleep(0.2)
+
                     delta = (time.time() - prev)*BiasSupplyControl.VOLTAGE_RAMP*np.sign(voltage - current)
+                    prev = time.time()
+
                     if (current + delta) <= voltage and voltage <= current:
                         current = voltage
                     elif (current + delta) >= voltage and voltage >= current:
