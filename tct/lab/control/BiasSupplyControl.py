@@ -132,21 +132,25 @@ class BiasSupplyControl():
         return True
 
     def SMUOn(self):
-        voltage = self.smu.voltage()
-        self.smu.setVoltage(0)
+        if not self.smu.state():
+            voltage = self.smu.voltage()
+            self.smu.setVoltage(0)
 
-        self.smu.on()
-        self.log("Bias-SMU", "Turn SMU on")
+            self.smu.on()
+            self.log("Bias-SMU", "Turn SMU on")
 
-        # Ramp voltage up to set value
-        return self.SMURampVoltage(voltage)
+            # Ramp voltage up to set value
+            return self.SMURampVoltage(voltage)
+
+        return True
 
     def SMUOff(self):
         # Ramp voltage down to 0
-        self.SMURampVoltage(0)
+        if self.smu.state():
+            self.SMURampVoltage(0)
 
-        self.smu.off()
-        self.log("Bias-SMU", "Turn SMU off")
+            self.smu.off()
+            self.log("Bias-SMU", "Turn SMU off")
 
         return True
 
