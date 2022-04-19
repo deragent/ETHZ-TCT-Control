@@ -33,6 +33,25 @@ class ParticularsLaserControl():
 
             self.log("Laser", f"Configured the laser frequency to {frequency/1000:0.0f}kHz.")
 
+    def ToState(self, state={}):
+        state['laser.frequency'] = self.LaserGetFrequency()
+        state['laser.dac'] = self.LaserGetDAC()
+        state['laser.state'] = self.LaserState()
+
+        return state
+
+    def FromState(self, state):
+        if 'laser.frequency' in state:
+            self.LaserSetFrequency(float(state['laser.frequency']))
+        if 'laser.dac' in state:
+            self.LaserSetDAC(int(state['laser.dac']))
+        if 'laser.state' in state:
+            if state['laser.state']:
+                self.LaserOn()
+            else:
+                self.LaserOff()
+
+
     def LaserOn(self):
         self.laser.on()
         self.log("Laser", f"Turned the laser on.")

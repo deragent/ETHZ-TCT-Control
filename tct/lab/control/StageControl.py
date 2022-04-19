@@ -23,6 +23,12 @@ class StageControl():
         'z': 0
     }
 
+    KEY_MAP = {
+        'x': 'stage.x',
+        'y': 'stage.y',
+        'z': 'stage.focus',
+    }
+
     # mm/step
     MMPERSTEP = 2.5e-3
 
@@ -70,6 +76,26 @@ class StageControl():
 
     def IsValid(self):
         return self._valid
+
+
+    def ToState(self, state={}):
+        pos = self.Position()
+        for ax, value in pos.items():
+            state[StageControl.KEY_MAP[ax]] = value
+
+        for ax, stage in self.stages.items():
+            status = stage.status()
+            for key, value in status.items():
+                state[f'stage.status.{ax}.{key}'] = value
+
+        return state
+
+    def FromState(self, state):
+        pos = {}
+        for ax, key in StageControl.KEY_MAP.items():
+            if key in state:
+                pos[ax] = float(state[key])
+        self.MoveTo(**pos)
 
 
     def _moveTo(self, ax, pos, blocking=False, nolimit=False):

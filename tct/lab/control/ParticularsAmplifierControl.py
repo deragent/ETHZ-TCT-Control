@@ -72,6 +72,24 @@ class ParticularsAmplifierControl():
         self.plh.setCurrent(ParticularsAmplifierControl.Amp_Current)
         self.log("Amp-PSU", f"Configured PSU: (0V - {ParticularsAmplifierControl.Amp_Current:.3f}A - High Range)")
 
+    def ToState(self, state={}):
+        state['amp.gain'] = self.AmpGet()
+        state['amp.state'] = self.AmpState()
+
+        state['amp.voltage'] = self.AmpVoltage()
+        state['amp.current'] = self.AmpCurrent()
+
+        return state
+
+    def FromState(self, state):
+        if 'amp.gain' in state:
+            self.AmpSet(float(state['amp.gain']))
+        if 'amp.state' in state:
+            if state['amp.state']:
+                self.AmpOn()
+            else:
+                self.AmpOff()
+
 
     ## Control the HV
     def AmpSet(self, percentage):

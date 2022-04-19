@@ -93,6 +93,24 @@ class BiasSupplyControl():
 
         self.log("Bias-SMU", f"Configured SMU: ({self.voltage_range} Voltage Range -- {self.current_limit} Current Compliance)")
 
+    def ToState(self, state={}):
+        state['bias.hv'] = self.SMUVoltage()
+        state['bias.state'] = self.SMUState()
+
+        state['bias.current'] = self.SMUCurrent()
+
+        return state
+
+    def FromState(self, state):
+        if 'bias.hv' in state:
+            self.SMURampVoltage(float(state['bias.hv']))
+        if 'bias.state' in state:
+            if state['bias.state']:
+                self.SMUOn()
+            else:
+                self.SMUOff()
+
+
     # Control the Bias HV
     # Implement ramp up and ramp down
     def SMURampVoltage(self, voltage):
@@ -169,7 +187,6 @@ class BiasSupplyControl():
     def SMUCurrent(self):
         if not self.smu.state():
             return None
-
 
         # Trigger one current measurement
         self.smu.setArmCount(1)
