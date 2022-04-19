@@ -4,6 +4,11 @@ import matplotlib.pyplot as plt
 import scipy.optimize
 import scipy.stats
 
+plt.rcParams.update({
+    'figure.figsize': (12.0, 8.0),
+    'font.size': 16,
+})
+
 from tct.system import Setup
 from tct.logger import Logger
 
@@ -34,8 +39,8 @@ s.amp.AmpOn()
 s.bias.SMURampVoltage(120)
 s.bias.SMUOn()
 
-def erf(x, A, mu, sigma):
-    return A*scipy.stats.norm.cdf(x, mu, sigma)
+def erf(x, A, B, mu, sigma):
+    return A*scipy.stats.norm.cdf(x, mu, sigma) + B
 Xfit = np.linspace(np.min(Xs), np.max(Xs), 101)
 
 for zz, Z in enumerate(Zs):
@@ -57,9 +62,13 @@ for zz, Z in enumerate(Zs):
     lines = plt.plot(Xs, data[zz, :], label=f'Focus: {Z:.3f}mm')
 
     try:
-        A, mu, sigma = scipy.optimize.curve_fit(erf, Xs, data[zz, :], p0=[1, 0.42, 0.02])[0]
+        B0 = np.min(data[zz, :])
+        A0 = np.max(data[zz, :]) - B0
+        mu0 = Xs[np.argmax(data[zz, :] - B0 >= 0.5*A0)]
 
-        plt.plot(Xfit, erf(Xfit, A, mu, sigma), color=lines[0].get_color(), linestyle='--', label=f'sig = {sigma*1e3:.2f} um')
+        A, B, mu, sigma = scipy.optimize.curve_fit(erf, Xs, data[zz, :], p0=[A0, B0, mu0, 0.02])[0]
+
+        plt.plot(Xfit, erf(Xfit, A, B, mu, sigma), color=lines[0].get_color(), linestyle='--', label=f'sig = {sigma*1e3:.2f} um')
     except Exception as e:
         print(e)
         pass
