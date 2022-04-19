@@ -66,6 +66,8 @@ setup.laser.LaserOn()
 
 log.log('SCAN', 'Start scan.')
 
+aborted = False
+
 scan = scanfile.getScan()
 for entry in scan:
     log.log('SCAN', f'Next entry: {entry}')
@@ -83,13 +85,16 @@ for entry in scan:
         entry.storeCurve(wave.x, wave.y, metadata=setup.scope.WaveToMetadata(wave))
     except KeyboardInterrupt:
         log.log('SCAN', f'WARNING: Received Ctrl+C!')
-        log.log('SCAN', 'Aboring scan!')
+        aborted = True
         break
     except:
         log.log('SCAN', f'ERROR: Exception during scan:\n{traceback.format_exc()}')
         if args.abort_on_error:
-            log.log('SCAN', 'Aboring scan!')
+            aborted = True
             break
+
+if aborted:
+    log.log('SCAN', 'Aborting scan!')
 
 
 scandir.writeList()
@@ -103,6 +108,8 @@ else:
     # By default we turn everything off
     setup.Off()
 
+if aborted:
+    sys.exit(-1)
 
 # TODO implement Analysis
 
