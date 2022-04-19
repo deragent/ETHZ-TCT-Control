@@ -41,3 +41,5 @@ This framework only works with python 3.7 or higher.
 - lecroyparser
 - pandas
 - pyyaml
+- h5py
+- slugify
