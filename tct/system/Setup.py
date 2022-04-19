@@ -16,11 +16,22 @@ class Setup():
         self.bias = BiasSupplyControl(VLimit = vlimit, ILimit = ilimit, log = self.log)
         self.scope = ScopeControl(log = self.log)
 
-    def ToState(self):
-        pass # TODO
+    def ToState(self, state={}):
+        self.stage.ToState(state)
+        self.laser.ToState(state)
+        self.amp.ToState(state)
+        self.bias.ToState(state)
 
-    def FromState(self):
-        pass # TODO
+        # TODO handle scope
+        return state
+
+    def FromState(self, state):
+        self.stage.FromState(state)
+        self.laser.FromState(state)
+        self.amp.FromState(state)
+        self.bias.FromState(state)
+
+        # TODO handle scope
 
     def Off(self):
         self.laser.LaserOff()
