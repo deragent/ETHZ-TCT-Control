@@ -46,6 +46,9 @@ scan:
   - x: lin(0.3, 0.6, 21)
 
 analysis:
-  x: x
-  y: integral
-  group: z
+  - x: x
+    plot: integral
+    group: focus
+  - x: x
+    y: hv
+    plot: integral
