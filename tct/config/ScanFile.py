@@ -162,8 +162,27 @@ class ScanFile():
             raise ScanFile.ConfigError(self, '[scope] has a bad definition!')
 
 
-    def _parseScanValues(self, values):
-        pass # TODO
+    def _parseScanValues(self, definition):
+        values = []
+
+        for entry in definition:
+            if isinstance(entry, str):
+                lin = re.search(ScanFile.LIN_REG, entry)
+                log = re.search(ScanFile.LOG_REG, entry)
+                range = re.search(ScanFile.RANGE_REG, entry)
+                if lin:
+                    values.extend(np.linspace(float(lin.group(1)), float(lin.group(2)), int(lin.group(3))))
+                elif log:
+                    values.extend(np.geomspace(float(log.group(1)), float(log.group(2)), int(log.group(3))))
+                elif range:
+                    values.extend(np.arange(float(range.group(1)), float(range.group(2)), float(range.group(3))))
+                else:
+                    raise Exception()
+
+            else:
+                values.append(entry)
+
+        return values
 
     def getScan(self):
         scan = Scan()
@@ -177,29 +196,11 @@ class ScanFile():
                 key = list(line.keys())[0]
                 param = self.translate(key)
                 definition = line[key]
-                values = []
 
                 if not isinstance(definition, list):
                     definition = [definition]
 
-                for entry in definition:
-                    if isinstance(entry, str):
-                        lin = re.search(ScanFile.LIN_REG, entry)
-                        log = re.search(ScanFile.LOG_REG, entry)
-                        range = re.search(ScanFile.RANGE_REG, entry)
-                        if lin:
-                            values.extend(np.linspace(float(lin.group(1)), float(lin.group(2)), int(lin.group(3))))
-                        elif log:
-                            values.extend(np.geomspace(float(log.group(1)), float(log.group(2)), int(log.group(3))))
-                        elif range:
-                            values.extend(np.arange(float(range.group(1)), float(range.group(2)), float(range.group(3))))
-                        else:
-                            raise Exception()
-
-                    else:
-                        values.append(entry)
-
-                scan.addParameter(param, values)
+                scan.addParameter(param, self._parseScanValues(definition))
 
             except:
                 raise ScanFile.ConfigError(self, f'Error while parsing scan entry [{line}]')
