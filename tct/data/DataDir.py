@@ -11,17 +11,19 @@ from .output import FileHDF5
 
 class ScanDir():
 
-    def __init__(self, folder, datadir, type=FileHDF5):
-        self.folder = Path(folder)
+    def __init__(self, parent, entry, datadir, type=FileHDF5):
+        self.entry = entry
+
+        self.folder = Path(parent) / entry
         self.folder.mkdir(exist_ok = False)
 
         self.datadir = datadir
 
         self._output = type
 
-        self.meta = folder / 'meta'
+        self.meta = self.folder / 'meta'
         self.meta.mkdir(exist_ok = False)
-        self.data = folder / 'data'
+        self.data = self.folder / 'data'
         self.data.mkdir(exist_ok = False)
 
         self._list = []
@@ -72,4 +74,13 @@ class DataDir():
         time.sleep(1)
         entry = f'{datetime.now():%Y%m%d-%H%M%S}_{slug}'
 
-        return ScanDir(self.folder / entry, self)
+        return ScanDir(self.folder, entry, self)
+
+    def trash(self, entry):
+        trash = self.folder / '_trash'
+        trash.mkdir(exist_ok=True)
+
+        folder = self.folder / entry
+        folder.rename(trash / entry)
+
+        return trash / entry
