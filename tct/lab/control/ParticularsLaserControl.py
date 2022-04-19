@@ -53,8 +53,10 @@ class ParticularsLaserControl():
 
 
     def LaserOn(self):
-        self.laser.on()
-        self.log("Laser", f"Turned the laser on.")
+        if self.laser.on():
+            self.log("Laser", f"Turned the laser on.")
+        else:
+            self.log("Laser", f"WARNING: Laser could not be turned on!")
 
     def LaserOff(self):
         self.laser.off()
