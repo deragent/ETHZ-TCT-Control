@@ -59,6 +59,7 @@ class ScanFile():
         self.meta = self._getMeta()
         self.limits = self._getLimits()
         self.setup = self._getSetup()
+        self.scope = self._getScope()
         self.end = self._getEnd()
         self.getScan()
         self.anlysis = self._getAnalysis()
@@ -147,6 +148,18 @@ class ScanFile():
         else:
             # Also for 'end' not present or 'end': off / False
             return False
+
+    def _getScope(self):
+        scope = self._get(['scope'], required=True)
+
+        if scope == 'single':
+            return {'type': 'single', 'count': 1}
+        elif 'single' in scope:
+            return {'type': 'single', 'count': int(scope['single'])}
+        elif 'average' in scope:
+            return {'type': 'average', 'count': int(scope['average'])}
+        else:
+            raise ScanFile.ConfigError(self, '[scope] has a bad definition!')
 
 
     def _parseScanValues(self, values):
