@@ -103,14 +103,14 @@ class BiasSupplyControl():
         if not self.smu.state():
             if voltage != self.smu.voltage():
                 self.smu.setVoltage(voltage)
-                self.log("Bias-SMU", "Set voltage to %fV"%(voltage))
+                self.log("Bias-SMU", "Set voltage to %fV."%(voltage))
 
         else:
             current = self.smu.voltage()
 
             if voltage != current:
                 prev = time.time()
-                self.log("Bias-SMU", "Start bias ramp at %fV"%(current))
+                self.log("Bias-SMU", "Start bias ramp at %fV."%(current))
 
                 while current != voltage:
                     time.sleep(0.2)
@@ -127,7 +127,7 @@ class BiasSupplyControl():
 
                     self.smu.setVoltage(current)
 
-                self.log("Bias-SMU", "Ramp bias to %fV"%(voltage))
+                self.log("Bias-SMU", "Ramp bias to %fV."%(voltage))
 
         return True
 
@@ -137,12 +137,14 @@ class BiasSupplyControl():
             self.smu.setVoltage(0)
 
             self.smu.on()
-            self.log("Bias-SMU", "Turn SMU on")
+            self.log("Bias-SMU", "Turn SMU on.")
 
             # Ramp voltage up to set value
             return self.SMURampVoltage(voltage)
 
-        return True
+        else:
+            self.log("Bias-SMU", "SMU is alredy on.")
+            return True
 
     def SMUOff(self):
         # Ramp voltage down to 0
@@ -150,9 +152,13 @@ class BiasSupplyControl():
             self.SMURampVoltage(0)
 
             self.smu.off()
-            self.log("Bias-SMU", "Turn SMU off")
+            self.log("Bias-SMU", "Turn SMU off.")
 
-        return True
+            return True
+
+        else:
+            self.log("Bias-SMU", "SMU is already off.")
+            return True
 
     def SMUState(self):
         return self.smu.state()
