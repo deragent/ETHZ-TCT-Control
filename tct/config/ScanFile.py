@@ -1,5 +1,6 @@
 import yaml
 import re
+import shutil
 import numpy as np
 
 from ..system import Scan
@@ -65,6 +66,14 @@ class ScanFile():
     def _read(self):
         with open(self._file, 'r') as stream:
             self._data = yaml.safe_load(stream)
+
+    def write(self, file):
+        with open(file, 'w') as stream:
+            yaml.dump(self._data, stream)
+
+    def copy(self, file):
+        return shutil.copy(self._file, file)
+
 
     def _get(self, keys, required=False):
         if not isinstance(keys, list):
