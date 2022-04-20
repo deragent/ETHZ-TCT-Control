@@ -91,6 +91,10 @@ class Plot():
         with matplotlib.rc_context({
             'figure.figsize': (12.0, 8.0),
             'font.size': 16,
+            # This is a hack to keep saved scatter dots to scale!
+            # DPI should not matter in this context, as we do not have any raster data.
+            # But the scatter(s=..) parameter is given in dots² so somehow this still maters.
+            'figure.dpi': 35,
         }):
             fig, ax = self._generate()
 
