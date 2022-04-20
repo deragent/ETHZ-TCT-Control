@@ -32,6 +32,8 @@ class Setup():
             self._system['code.git.branch'] = None
             self._system['code.git.dirty'] = None
 
+        # Dummy state to allow for repetition of scans
+        self.count = 0
 
         # Create the setup control classes
         self.stage = StageControl(log = self.log)
@@ -42,6 +44,7 @@ class Setup():
 
     def ToState(self, state={}):
         state['time'] = datetime.now().isoformat()
+        state['count'] = self.count
 
         self.stage.ToState(state)
         self.laser.ToState(state)
@@ -59,6 +62,8 @@ class Setup():
         self.amp.FromState(state)
         self.bias.FromState(state)
 
+        if 'count' in state:
+            self.count = int(state['count'])
         # TODO handle scope
 
     def Off(self):

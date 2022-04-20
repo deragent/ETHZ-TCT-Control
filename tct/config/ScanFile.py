@@ -4,7 +4,7 @@ import shutil
 import numpy as np
 
 from ..system import Scan
-from .Definition import KEY_MAP
+from .Definition import KEY_MAP, SETUP_KEYS
 from .AnalysisDefinition import AnalysisDefinition
 
 class ScanFile():
@@ -118,7 +118,7 @@ class ScanFile():
         state['laser.state'] = True
         state['bias.state'] = True
 
-        for key in KEY_MAP:
+        for key in SETUP_KEYS:
             state[self.translate(key)] = self._get(['setup', key], required=True)
 
         return state
@@ -130,7 +130,7 @@ class ScanFile():
             return {}
         elif isinstance(end, dict):
             state = {}
-            for key in KEY_MAP:
+            for key in SETUP_KEYS:
                 value = self._get(['end', key], required=False)
                 if value is not None:
                     state[self.translate(key)] = value
