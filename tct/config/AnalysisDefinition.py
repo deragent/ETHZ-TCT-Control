@@ -28,7 +28,7 @@ class AnalysisDefinition():
         'laser.frequency': ('Laser Rate', 'Rate', 'kHz', 1e-3),
         'amp.gain': ('Amplifier Gain', 'Gain', '%', 1),
         'min()': ('Minimum Amplitude', 'max()', 'mV', 1e3),
-        'max()': ('Maximum Amplitude', 'min(), ''mV', 1e3),
+        'max()': ('Maximum Amplitude', 'min()', 'mV', 1e3),
         'integral()': ('Pulse Integral', 'integral()', 'arb', 1e9)
     }
 
