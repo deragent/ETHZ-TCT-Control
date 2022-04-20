@@ -5,6 +5,28 @@ from ..Lecroy import WaveRunner8104
 
 class ScopeControl():
 
+    def WaveToMetadata(self, wave):
+
+        metadata = {
+            'instrument': wave.instrumentName,
+            'instrumentNumber': wave.instrumentNumber,
+            'waveArrayCount': wave.waveArrayCount,
+            'verticalGain': wave.verticalGain,
+            'verticalOffset': wave.verticalOffset,
+            'nominalBits': wave.nominalBits,
+            'horizInterval': wave.horizInterval,
+            'horizOffset': wave.horizOffset,
+            'triggerTime': wave.triggerTime,
+            'recordType': wave.recordType,
+            'processingDone': wave.processingDone,
+            'timeBase': wave.timeBase,
+            'verticalCoupling': wave.verticalCoupling,
+            'bandwidthLimit': wave.bandwidthLimit,
+            'waveSource': wave.waveSource,
+        }
+
+        return metadata
+
     def __init__(self, setup=True, log=None):
         self.scope = WaveRunner8104("10.10.0.11", log=log)
         self._log = log
@@ -49,6 +71,11 @@ class ScopeControl():
 
 
     def AcquireAverage(self):
+        # Clear the previous sweeps
+        self.scope.TriggerMode(WaveRunner8104.TRIGGER_MODE.STOP)
+        self.scope.ClearSweeps(self.CH)
+        self.scope.WaitUntilIdle(1)
+
         num_average = self.scope.GetAverage(self.CH)
 
         self.log('Scope', 'Waiting for initial trigger.')
