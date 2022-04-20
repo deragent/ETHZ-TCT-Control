@@ -43,7 +43,13 @@ for xx, X in enumerate(Xs):
 
         print(f'{X}\t{Y}\t{Z}\t{data[xx, yy]}')
 
-fig = plt.imshow(data, extent=[min(Xs),max(Xs),min(Ys),max(Ys)], origin="lower")
-plt.show()
 
 s.Off()
+
+
+fig = plt.imshow(data.T, extent=[min(Xs),max(Xs),min(Ys),max(Ys)], origin="lower") #, norm=matplotlib.colors.LogNorm())
+
+plt.xlabel('X-Position [mm]')
+plt.ylabel('Y-Position [mm]')
+plt.colorbar()
+plt.show()
