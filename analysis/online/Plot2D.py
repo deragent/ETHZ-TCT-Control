@@ -43,7 +43,9 @@ class Plot2D(Plot):
             A, B, mu, sigma = scipy.optimize.curve_fit(ERF, x, y, p0=[A0, B0, mu0, 0.02])[0]
 
             xfit = np.linspace(np.min(x), np.max(x), 101)
-            ax.plot(xfit, ERF(xfit, A, B, mu, sigma), color=color, linestyle='--', label=f'sig = {sigma}')
+            # The factor of 1e3 (mm -> um) is hardcoded here.
+            # This is ok for now, as the main function of this fit is to find the focused beam size (in the order of 10um)
+            ax.plot(xfit, ERF(xfit, A, B, mu, sigma), color=color, linestyle='--', label=f'sig = {sigma*1e3:.3f}')
 
             return True
         except Exception as e:
