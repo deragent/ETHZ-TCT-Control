@@ -59,8 +59,7 @@ class ScanDir():
             '_prefix': prefix,
             '_type': ScanDir.TYPES[self._output],
         }
-        for key, value in state:
-            metadata[key] = value
+        metadata.update(state)
 
         self._list.append(metadata)
 
