@@ -4,6 +4,7 @@ import shutil
 import numpy as np
 
 from ..system import Scan
+from .Definition import KEY_MAP
 
 class ScanFile():
 
@@ -30,17 +31,6 @@ class ScanFile():
 
             self.msg = f'Missing key [{".".join(self.keys)}]!'
 
-
-    KEY_MAP = {
-        'gain': 'amp.gain',
-        'hv': 'bias.hv',
-        'x': 'stage.x',
-        'y': 'stage.y',
-        'focus': 'stage.focus',
-        'frequency': 'laser.frequency',
-        'dac': 'laser.dac',
-    }
-
     META_KEYS = ['name', 'description', 'operator', 'laser', 'aperture', 'sample', 'wafer', 'side']
 
 
@@ -62,7 +52,7 @@ class ScanFile():
         self.scope = self._getScope()
         self.end = self._getEnd()
         self.getScan()
-        self.anlysis = self._getAnalysis()
+        self.analysis = self._getAnalysis()
 
     def _read(self):
         with open(self._file, 'r') as stream:
@@ -94,10 +84,10 @@ class ScanFile():
 
 
     def translate(self, key):
-        if key not in ScanFile.KEY_MAP:
+        if key not in KEY_MAP:
             raise ScanFile.ConfigError(self, f'Key [{key}] is not valid!')
 
-        return ScanFile.KEY_MAP[key]
+        return KEY_MAP[key]
 
 
 
@@ -127,7 +117,7 @@ class ScanFile():
         state['laser.state'] = True
         state['bias.state'] = True
 
-        for key in ScanFile.KEY_MAP:
+        for key in KEY_MAP:
             state[self.translate(key)] = self._get(['setup', key], required=True)
 
         return state
@@ -139,7 +129,7 @@ class ScanFile():
             return {}
         elif isinstance(end, dict):
             state = {}
-            for key in ScanFile.KEY_MAP:
+            for key in KEY_MAP:
                 value = self._get(['end', key], required=False)
                 if value is not None:
                     state[self.translate(key)] = value
