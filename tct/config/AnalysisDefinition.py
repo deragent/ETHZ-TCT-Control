@@ -43,38 +43,34 @@ class AnalysisDefinition():
     # Implement better checking of values
 
     def __init__(self, definition):
+        self.definition = definition
 
-        self.x = self.mapKey(definition['x'])
+        self.plot = self.mapKey(self._get('plot', required=True))
+        self.x = self.mapKey(self._get('x', required=True))
 
         if 'y' in definition:
-            self.y = self.mapKey(definition['y'])
+            self.y = self.mapKey(self._get('y', required=True))
             self.type = AnalysisDefinition.TYPE_3D
         else:
             self.type = AnalysisDefinition.TYPE_2D
 
-        self.plot = self.mapKey(definition['plot'])
+        groups = self._get('group', default=[])
+        if not isinstance(groups, list):
+            groups = [groups]
+        self.group = [self.mapKey(group) for group in groups]
 
-        self.group = []
-        if 'group' in definition:
-            groups = definition['group']
-            if not isinstance(groups, list):
-                groups = [groups]
+        self.fit = self._get('fit')
 
-            for group in groups:
-                self.group.append(self.mapKey(group))
+        self._title = self._get('title')
+        self._name = self._get('name')
 
-        self.fit = None
-        if 'fit' in definition:
-            self.fit = definition['fit']
-
-        self._title = None
-        if 'title' in definition:
-            self._title = definition['title']
-
-        self._name = None
-        if 'name' in definition:
-            self._name = definition['name']
-
+    def _get(self, key, default=None, required=False):
+        if key in self.definition:
+            return self.definition[key]
+        elif required:
+            raise Exception(f'Missing analysis key [{key}]!')
+        else:
+            return None
 
     def getMeta(self, key):
         if key not in self.META:
