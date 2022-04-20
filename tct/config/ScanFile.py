@@ -5,6 +5,7 @@ import numpy as np
 
 from ..system import Scan
 from .Definition import KEY_MAP
+from .AnalysisDefinition import AnalysisDefinition
 
 class ScanFile():
 
@@ -198,4 +199,15 @@ class ScanFile():
         return scan
 
     def _getAnalysis(self):
-        pass # TODO
+        analysis = self._get(['analysis'], required=False)
+        if analysis is None:
+            return []
+
+        if isinstance(analysis, dict):
+            analysis = [analysis]
+
+        definitions = []
+        for entry in analysis:
+            definitions.append(AnalysisDefinition(entry))
+
+        return definitions
