@@ -11,6 +11,10 @@ from .output import FileHDF5
 
 class ScanDir():
 
+    TYPES = {
+        FileHDF5: 'hdf5',
+    }
+
     def __init__(self, parent, entry, datadir, type=FileHDF5):
         self.entry = entry
 
@@ -49,8 +53,13 @@ class ScanDir():
     def addEntry(self, state):
         prefix = f'A{self._count}'
 
-        metadata = state.copy()
-        metadata['_prefix'] = prefix
+        metadata = {
+            '_prefix': prefix,
+            '_type': ScanDir.TYPES[self._output],
+        }
+        for key, value in state:
+            metadata[key] = value
+
         self._list.append(metadata)
 
         self._count += 1
