@@ -67,6 +67,14 @@ class AnalysisDefinition():
         if 'fit' in definition:
             self.fit = definition['fit']
 
+        self._title = None
+        if 'title' in definition:
+            self._title = definition['title']
+
+        self._name = None
+        if 'name' in definition:
+            self._name = definition['name']
+
 
     def getMeta(self, key):
         if key not in self.META:
@@ -77,6 +85,8 @@ class AnalysisDefinition():
     def name(self):
         '''Returns a name built from properties.
         To be used for example as a plot filename.'''
+        if self._name is not None:
+            return self._name
 
         group = '[' + '-'.join(self.group) + ']'
         if self.fit is None:
@@ -91,6 +101,8 @@ class AnalysisDefinition():
 
     def title(self):
         '''Returns a human readable title for the analysis.'''
+        if self._title is not None:
+            return self._title
 
         if self.type == self.TYPE_3D:
             return f'{self.plot} in function of {self.x} and {self.y}'

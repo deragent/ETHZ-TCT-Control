@@ -47,8 +47,11 @@ scan:
 
 analysis:
   - x: x
-    plot: integral
+    plot: integral()
     group: focus
-  - x: x
+    fit: erf()
+  - title: 'Test Title to be shown on the plot'
+    name: name-used-also-for-file-export-without-suffix
+    x: x
     y: hv
-    plot: integral
+    plot: integral()
