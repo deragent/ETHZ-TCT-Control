@@ -29,6 +29,8 @@ class ScanDir():
         self.meta.mkdir(exist_ok = False)
         self.data = self.folder / 'data'
         self.data.mkdir(exist_ok = False)
+        self.plot = self.folder / 'plot'
+        self.plot.mkdir(exist_ok = False)
 
         self._list = []
         self._count = 0
