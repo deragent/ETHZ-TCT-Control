@@ -6,6 +6,8 @@ from .TCTOutput import TCTOutput
 class FileHDF5(TCTOutput):
 
     def __init__(self, prefix):
+        super().__init__(prefix)
+        
         self.stream = None
 
         self.file = prefix.parent / f'{prefix.name}.hdf5'
