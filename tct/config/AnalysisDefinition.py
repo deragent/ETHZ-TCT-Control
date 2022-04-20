@@ -70,7 +70,7 @@ class AnalysisDefinition():
         elif required:
             raise Exception(f'Missing analysis key [{key}]!')
         else:
-            return None
+            return default
 
     def getMeta(self, key):
         if key not in self.META:
