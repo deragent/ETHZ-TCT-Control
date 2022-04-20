@@ -1,3 +1,9 @@
+from datetime import datetime
+import os
+import sys
+import socket
+import git
+
 from tct.lab.control import *
 from tct.logger import Logger
 
@@ -10,6 +16,24 @@ class Setup():
         else:
             self.log = log
 
+        # Computer and script metadata
+        self._system = {}
+        self._system['setup.hostname'] = socket.gethostname()
+        self._system['setup.user'] = os.getlogin()
+        self._system['code.script'] = os.path.basename(sys.argv[0])
+
+        repo = git.Repo(search_parent_directories=True)
+        if repo:
+            self._system['code.git.hash'] = repo.head.object.hexsha
+            self._system['code.git.branch'] = repo.active_branch.name
+            self._system['code.git.dirty'] = repo.is_dirty()
+        else:
+            self._system['code.git.hash'] = None
+            self._system['code.git.branch'] = None
+            self._system['code.git.dirty'] = None
+
+
+        # Create the setup control classes
         self.stage = StageControl(log = self.log)
         self.laser = ParticularsLaserControl(log = self.log)
         self.amp = ParticularsAmplifierControl(log = self.log)
@@ -17,10 +41,14 @@ class Setup():
         self.scope = ScopeControl(log = self.log)
 
     def ToState(self, state={}):
+        state['time'] = datetime.now().isoformat()
+
         self.stage.ToState(state)
         self.laser.ToState(state)
         self.amp.ToState(state)
         self.bias.ToState(state)
+
+        state.update(self._system)
 
         # TODO handle scope
         return state

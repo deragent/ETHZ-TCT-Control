@@ -43,3 +43,4 @@ This framework only works with python 3.7 or higher.
 - pyyaml
 - h5py
 - slugify
+- gitpython
