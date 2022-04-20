@@ -3,13 +3,6 @@ import argparse
 import sys
 import traceback
 
-import matplotlib.pyplot as plt
-
-from tct.data import DataDir
-from tct.config import ScanFile
-from tct.system import Setup
-
-
 # Parse the command line arguments
 parser = argparse.ArgumentParser(description='Command-Line Interface (CLI) for the TCT Setup')
 parser.add_argument('config',
@@ -30,6 +23,20 @@ parser.add_argument('--batch', '-B', action='store_true',
                     help='Combines --no-confirm, --abort-on-error and --no-show')
 
 args = parser.parse_args()
+
+
+import matplotlib.pyplot as plt
+
+# Switch to displayles matplotlib backend if we do not show the plots
+if not args.show_plot or args.batch:
+    plt.switch_backend('agg')
+
+
+# Import TCT related classes
+from tct.data import DataDir
+from tct.config import ScanFile
+from tct.system import Setup
+
 
 # Handle the input and output data structures
 scanfile = ScanFile(args.config)
