@@ -3,11 +3,11 @@ import argparse
 import sys
 import traceback
 
+import matplotlib.pyplot as plt
+
 from tct.data import DataDir
 from tct.config import ScanFile
-
 from tct.system import Setup
-
 
 
 # Parse the command line arguments
@@ -16,14 +16,18 @@ parser.add_argument('config',
                     help='The scan config file')
 
 parser.add_argument('--data', '-D', default='./_data',
-                    help='The directory where the scan data will be placed. Will be created if not existing!')
+                    help='The directory where the scan data will be placed. Will be created if not existing! Default: [./_data]')
 
 parser.add_argument('--quiet', dest='print', action='store_false',
                     help='Do not print any log messages to stdout!')
 parser.add_argument('--no-confirm', '-N', dest='confirm', action='store_false',
                     help='Do not ask for any confirmation. Important for batch operation!')
+parser.add_argument('--no-show', dest='show_plot', action='store_false',
+                    help='Do not show the analysis plots at the end!')
 parser.add_argument('--abort-on-error', action='store_true',
                     help='Abort the scan if an error occurs.')
+parser.add_argument('--batch', '-B', action='store_true',
+                    help='Combines --no-confirm, --abort-on-error and --no-show')
 
 args = parser.parse_args()
 
@@ -39,7 +43,7 @@ scandir.writeMetaData(scanfile.meta)
 
 log = scandir.logger(print=args.print)
 
-if args.confirm:
+if args.confirm and not args.batch:
     result = pt.shortcuts.yes_no_dialog(
         title='Confirm Voltage and Current Limits',
         text=f'Are the following limit settings corrent?\n\n    Voltage Limit: {scanfile.limits["vlimit"]:.2f} V\n\n    Current Limit: {scanfile.limits["ilimit"]*1e3:.3f} mA'
@@ -89,7 +93,7 @@ for entry in scan:
         break
     except:
         log.log('SCAN', f'ERROR: Exception during scan:\n{traceback.format_exc()}')
-        if args.abort_on_error:
+        if args.abort_on_error or args.batch:
             aborted = True
             break
 
@@ -111,10 +115,41 @@ else:
 if aborted:
     sys.exit(-1)
 
-# TODO implement Analysis
 
 
-if args.confirm:
+if len(scanfile.analysis) > 0:
+    log.log('SCAN', 'Running online analysis.')
+
+    import analysis.data
+    import analysis.online
+
+    scandata = analysis.data.Scan(scandir.folder)
+
+    for definition in scanfile.analysis:
+        try:
+
+            if definition.type == definition.TYPE_3D:
+                plot = analysis.online.Plot3D(definition, scandata)
+            elif definition.type == definition.TYPE_2D:
+                plot = analysis.online.Plot2D(definition, scandata)
+            else:
+                log.log('SCAN', f'WARNING: Unexpected analysis type encountered [{definition.type}]')
+                continue
+
+            plot.save(scandir.plot)
+            plot.generate()
+
+        except KeyboardInterrupt:
+            log.log('SCAN', f'WARNING: Received Ctrl+C!')
+            break
+        except:
+            log.log('SCAN', f'ERROR: Exception during analysis [{definition.name()}]:\n{traceback.format_exc()}')
+
+    if args.show_plot and not args.batch:
+        plt.show()
+
+
+if args.confirm and not args.batch:
     result = pt.shortcuts.yes_no_dialog(
         title='Save data of this run.',
         text='Do you want to keep the data acquired in this scan?'
