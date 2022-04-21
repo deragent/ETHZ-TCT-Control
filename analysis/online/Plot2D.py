@@ -65,6 +65,8 @@ class Plot2D(Plot):
             x = np.array(self.transform(self.definition.x, data[self.definition.x]))
             y = np.array(self.transform(self.definition.plot, data[self.definition.plot]))
 
+            # TODO: Add support for log scaling of axis
+
             linestyle = '-'
             marker = '.'
             if not self.isMonothonic(x):

@@ -1,5 +1,6 @@
 import numpy as np
 import mpl_toolkits.axes_grid1
+import matplotlib.colors
 
 from .Plot import Plot
 
@@ -28,10 +29,13 @@ class Plot3D(Plot):
         print(width, height)
 
         l = fig.dpi*np.min((height/len(np.unique(y)), width/len(np.unique(x))))
-        print(fig.dpi)
-        print(l)
 
-        scatter = ax.scatter(x, y, c=z, s=3*l**2, alpha=0.8)
+        norm = None
+        if self.definition.scale['color'] == 'log':
+            z = np.abs(z)
+            norm = matplotlib.colors.LogNorm()
+
+        scatter = ax.scatter(x, y, c=z, s=3*l**2, alpha=0.8, norm=norm)
 
         divider = mpl_toolkits.axes_grid1.make_axes_locatable(ax)
         cax = divider.append_axes('right', size='5%', pad=0.1)

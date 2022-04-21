@@ -65,6 +65,16 @@ class AnalysisDefinition():
         self._title = self._get('title')
         self._name = self._get('name')
 
+        self.scale = {
+            'x': 'lin',
+            'y': 'lin',
+            'color': 'lin'
+        }
+        scale = self._get('scale', default={})
+        for ax in self.scale:
+            if ax in scale:
+                self.scale[ax] = scale[ax]
+
     def _get(self, key, default=None, required=False):
         if key in self.definition:
             return self.definition[key]
