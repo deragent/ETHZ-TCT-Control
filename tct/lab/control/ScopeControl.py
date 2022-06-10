@@ -53,8 +53,6 @@ class ScopeControl():
         return state
 
     def FromState(self, state):
-        print(state)
-
         if 'scope.average' in state:
             # TODO this should call a higher order function in ScopeControl
             self.scope.Average(self.CH, state['scope.average'])
