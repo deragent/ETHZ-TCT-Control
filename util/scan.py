@@ -1,6 +1,7 @@
 import prompt_toolkit as pt
 import argparse
 import sys
+import time
 import traceback
 
 # Parse the command line arguments
@@ -79,9 +80,17 @@ log.log('SCAN', 'Start scan.')
 
 aborted = False
 
+run_entries = 0
+run_time = 0
+
 scan = scanfile.getScan()
-for entry in scan:
-    log.log('SCAN', f'Next entry: {entry}')
+total_entries = scan.count()
+for ee, entry in enumerate(scan):
+    log.log('SCAN', f'Scan entry [{ee}]: {entry}')
+    if run_entries > 0:
+        time_left = (total_entries - (ee+1))*run_time/run_entries
+        log.log('SCAN', f'Time remaining: {int(time_left/60):02}:{int(time_left%60):02}')
+    time_start = time.time()
 
     try:
         setup.FromState(entry)
@@ -104,12 +113,16 @@ for entry in scan:
             aborted = True
             break
 
+    run_entries += 1
+    run_time += time.time() - time_start
+
 if aborted:
     log.log('SCAN', 'Aborting scan!')
 
 
 scandir.writeList()
 log.log('SCAN', 'Finished the scan.')
+log.log('SCAN', f'Total time: {int(run_time/60):02}:{int(run_time%60):02}')
 
 # Handle end of state
 log.log('SCAN', 'Applying end-state.')
