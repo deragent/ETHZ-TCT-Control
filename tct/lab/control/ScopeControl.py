@@ -43,6 +43,24 @@ class ScopeControl():
         if self._log is not None:
             self._log.log(cat, msg)
 
+
+    def ToState(self, state={}):
+        # TODO properly implement
+
+        # TODO this should call a higher order function in ScopeControl
+        state['scope.average'] = self.scope.GetAverage(self.CH)
+
+        return state
+
+    def FromState(self, state):
+        print(state)
+
+        if 'scope.average' in state:
+            # TODO this should call a higher order function in ScopeControl
+            self.scope.Average(self.CH, state['scope.average'])
+
+        # TODO properly implement
+
     def Reset(self):
         # TODO
         pass

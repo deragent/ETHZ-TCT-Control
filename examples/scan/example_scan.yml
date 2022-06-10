@@ -12,9 +12,7 @@ limits:
   voltage: 1000
   current: 0.002
 
-scope:
-  average: 100
-
+# TODO review scope definition
 # Scope alternative:
 # scope:
 #   single: 30
@@ -28,6 +26,7 @@ setup:
   focus: 78.2
   frequency: 50e3
   dac: 290
+  average: 100
 
 end: off
 

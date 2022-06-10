@@ -46,6 +46,7 @@ class Setup():
         state['time'] = datetime.now().isoformat()
         state['count'] = self.count
 
+        self.scope.ToState(state)
         self.stage.ToState(state)
         self.laser.ToState(state)
         self.amp.ToState(state)
@@ -53,10 +54,10 @@ class Setup():
 
         state.update(self._system)
 
-        # TODO handle scope
         return state
 
     def FromState(self, state):
+        self.scope.FromState(state)
         self.stage.FromState(state)
         self.laser.FromState(state)
         self.amp.FromState(state)
@@ -64,7 +65,6 @@ class Setup():
 
         if 'count' in state:
             self.count = int(state['count'])
-        # TODO handle scope
 
     def Off(self):
         self.laser.LaserOff()
