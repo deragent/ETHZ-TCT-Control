@@ -19,6 +19,8 @@ class Scan():
 
         self._list = pd.read_csv(self.meta / 'list.csv')
 
+        self._pp = preprocess
+
     def list(self):
         return self._list
 
@@ -63,9 +65,13 @@ class Scan():
         time, amplitude = entry.curve(curve)
         sel = time >= 0
 
-        offset = np.mean(amplitude[time < 0])
+        if self._pp is None:
+            offset = np.mean(amplitude[time < 0])
 
-        amplitude = amplitude - offset
+            amplitude = amplitude - offset
+        else:
+            amplitude = self._pp.Full(time, amplitude)
+            amplitude = self._pp.RemoveReflection(time, amplitude)
 
         time = time[sel]
         amplitude = amplitude[sel]
