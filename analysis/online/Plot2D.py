@@ -91,8 +91,9 @@ class Plot2D(Plot):
             if self.definition.fit == self.definition.FIT_ERF:
                 legend = self._addERFFit(ax, x, y, lines[0].get_color()) and legend
 
+        if legend:
+            ax.legend()
 
-        ax.legend()
         ax.set_xlabel(self.label(self.definition.x))
         ax.set_ylabel(self.label(self.definition.plot))
 
