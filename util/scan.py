@@ -86,7 +86,7 @@ run_time = 0
 scan = scanfile.getScan()
 total_entries = scan.count()
 for ee, entry in enumerate(scan):
-    log.log('SCAN', f'Scan entry [{ee}]: {entry}')
+    log.log('SCAN', f'Scan entry [{ee} of {total_entries}]: {entry}')
     if run_entries > 0:
         time_left = (total_entries - (ee+1))*run_time/run_entries
         log.log('SCAN', f'Time remaining: {int(time_left/60):02}:{int(time_left%60):02}')
