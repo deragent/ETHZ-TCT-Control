@@ -1,36 +1,12 @@
-import yaml
 import re
-import shutil
 import numpy as np
 
 from ..system import Scan
-from .Definition import KEY_MAP, SETUP_KEYS
+from .ConfigFile import ConfigFile
+from .Definition import SETUP_KEYS
 from .AnalysisDefinition import AnalysisDefinition
 
-class ScanFile():
-
-    class ConfigError(Exception):
-        def __init__(self, config, msg=None):
-            self.file = config._file
-            self.msg = msg
-
-        def __str__(self):
-            msg = ''
-            if self.msg is not None:
-                msg = f': {self.msg}'
-
-            return f'ScanFile Config Error [{self.file}]{msg}'
-
-    class MissingError(ConfigError):
-        def __init__(self, config, key):
-            super().__init__(config)
-
-            if isinstance(key, list):
-                self.keys = key
-            else:
-                self.keys = [key]
-
-            self.msg = f'Missing key [{".".join(self.keys)}]!'
+class ScanFile(ConfigFile):
 
     META_KEYS = ['name', 'description', 'operator', 'laser', 'aperture', 'sample', 'wafer', 'side']
 
@@ -41,10 +17,7 @@ class ScanFile():
 
 
     def __init__(self, file):
-        self._file = file
-        self._data = {}
-
-        self._read()
+        super().__init__(file)
 
         # Load all the data - This also verifies the file
         self.meta = self._getMeta()
@@ -54,42 +27,6 @@ class ScanFile():
         self.end = self._getEnd()
         self.getScan()
         self.analysis = self._getAnalysis()
-
-    def _read(self):
-        with open(self._file, 'r') as stream:
-            self._data = yaml.safe_load(stream)
-
-    def write(self, file):
-        with open(file, 'w') as stream:
-            yaml.dump(self._data, stream)
-
-    def copy(self, file):
-        return shutil.copy(self._file, file)
-
-
-    def _get(self, keys, required=False):
-        if not isinstance(keys, list):
-            keys = [keys]
-
-        root = self._data
-        for kk, key in enumerate(keys):
-            if key not in root:
-                if required:
-                    raise ScanFile.MissingError(self, keys[:kk+1])
-                else:
-                    return None
-
-            root = root[key]
-
-        return root
-
-
-    def translate(self, key):
-        if key not in KEY_MAP:
-            raise ScanFile.ConfigError(self, f'Key [{key}] is not valid!')
-
-        return KEY_MAP[key]
-
 
 
     def _getMeta(self):
@@ -152,7 +89,7 @@ class ScanFile():
         # elif 'average' in scope:
         #     return {'type': 'average', 'count': int(scope['average'])}
         # else:
-        #     raise ScanFile.ConfigError(self, '[scope] has a bad definition!')
+        #     raise ConfigFile.ConfigError(self, '[scope] has a bad definition!')
 
         # average is now part of the state / setup
 
@@ -186,7 +123,7 @@ class ScanFile():
 
         data = self._get(['scan'], required=True)
         if not isinstance(data, list):
-            raise ScanFile.ConfigError(self, '[scan] needs to be a list of parameter with values!')
+            raise ConfigFile.ConfigError(self, '[scan] needs to be a list of parameter with values!')
 
         for line in data:
             try:
@@ -200,7 +137,7 @@ class ScanFile():
                 scan.addParameter(param, self._parseScanValues(definition))
 
             except:
-                raise ScanFile.ConfigError(self, f'Error while parsing scan entry [{line}]')
+                raise ConfigFile.ConfigError(self, f'Error while parsing scan entry [{line}]')
 
         return scan
 
