@@ -10,14 +10,14 @@ parser.add_argument('config',
 
 parser.add_argument('scan',
                     help='Scan data directory.')
-parser.add_argument('--output' '-O', default=None,
-                    help='Ouptput directory, where the plots will be written. If not given, will be written to the scan data directory. Also see `--no-save`.')
+parser.add_argument('--output', '-O', default=None,
+                    help='Ouptput directory, where the plots will be written. If not given, will be written to the scan data directory. Also see `--save`.')
 
+parser.add_argument('--save', dest='save_plot', action='store_true',
+                    help='Do not write the plots to the scan data directory.')
 
 parser.add_argument('--no-show', dest='show_plot', action='store_false',
                     help='Do not show the analysis plots at the end!')
-parser.add_argument('--no-save', dest='save_plot', action='store_false',
-                    help='Do not write the plots to the scan data directory.')
 
 args = parser.parse_args()
 
@@ -30,25 +30,26 @@ if not args.show_plot:
 
 
 # Import TCT related classes
-from tct.data import ScanDir
 from tct.config import AnalysisFile
+from tct.logger import Logger
 
 import analysis.data
 import analysis.online
 
 
 # Handle the input and output data structures
-scanfile = ScanFile(args.config)
+analysisfile = AnalysisFile(args.config)
 
-# TODO Load the Scan
+log = Logger(print=True, debug=False)
+log.log('ANALYSIS', 'Running online analysis.')
 
+scandata = analysis.data.Scan(args.scan)
 
-# TODO review loggin
-log.log('SCAN', 'Running online analysis.')
+output_dir = scandata.plot
+if args.output is not None:
+    output_dir = args.output
 
-scandata = analysis.data.Scan()# TODO
-
-for definition in scanfile.analysis:
+for definition in analysisfile.analysis:
     try:
 
         if definition.type == definition.TYPE_3D:
@@ -56,19 +57,19 @@ for definition in scanfile.analysis:
         elif definition.type == definition.TYPE_2D:
             plot = analysis.online.Plot2D(definition, scandata)
         else:
-            log.log('SCAN', f'WARNING: Unexpected analysis type encountered [{definition.type}]')
+            log.log('ANALYSIS', f'WARNING: Unexpected analysis type encountered [{definition.type}]')
             continue
 
         if args.save_plot:
-            plot.save() # TODO also use args.output
+            plot.save(output_dir)
 
         plot.generate()
 
     except KeyboardInterrupt:
-        log.log('SCAN', f'WARNING: Received Ctrl+C!')
+        log.log('ANALYSIS', f'WARNING: Received Ctrl+C!')
         break
     except:
-        log.log('SCAN', f'ERROR: Exception during analysis [{definition.name()}]:\n{traceback.format_exc()}')
+        log.log('ANALYSIS', f'ERROR: Exception during analysis [{definition.name()}]:\n{traceback.format_exc()}')
 
-if args.show_plot
+if args.show_plot:
     plt.show()

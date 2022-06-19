@@ -16,6 +16,7 @@ class Scan():
 
         self.meta = self.folder / 'meta'
         self.data = self.folder / 'data'
+        self.plot = self.folder / 'plot'
 
         self._list = pd.read_csv(self.meta / 'list.csv')
 
