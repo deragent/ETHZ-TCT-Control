@@ -169,6 +169,10 @@ if len(scanfile.analysis) > 0:
         plt.show()
 
 
+
+log.log('SCAN', f'Data in [{scandir.entry}]')
+log.log('SCAN', f'Folder: {scandir.folder}')
+
 if args.confirm and not args.batch:
     result = pt.shortcuts.yes_no_dialog(
         title='Save data of this run.',
