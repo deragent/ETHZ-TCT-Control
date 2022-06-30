@@ -128,13 +128,20 @@ class ScanFile(ConfigFile):
         for line in data:
             try:
                 key = list(line.keys())[0]
-                param = self.translate(key)
                 definition = line[key]
+
+                # Detect parameter which is iterated manually
+                manual = False
+                if key.startswith('manual-'):
+                    manual = True
+                    param = self.translate(key[len('manual-'):], strict=False)
+                else:
+                    param = self.translate(key)
 
                 if not isinstance(definition, list):
                     definition = [definition]
 
-                scan.addParameter(param, self._parseScanValues(definition))
+                scan.addParameter(param, self._parseScanValues(definition), manual=manual)
 
             except:
                 raise ConfigFile.ConfigError(self, f'Error while parsing scan entry [{line}]')

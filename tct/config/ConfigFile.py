@@ -64,8 +64,11 @@ class ConfigFile():
         return root
 
 
-    def translate(self, key):
+    def translate(self, key, strict=True):
         if key not in KEY_MAP:
-            raise ConfigFile.ConfigError(self, f'Key [{key}] is not valid!')
+            if strict:
+                raise ConfigFile.ConfigError(self, f'Key [{key}] is not valid!')
+            else:
+                return key
 
         return KEY_MAP[key]

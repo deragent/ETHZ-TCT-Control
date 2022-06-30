@@ -1,6 +1,25 @@
 
 class Scan():
 
+    class Entry():
+
+        def __init__(self, changed_param, state, manual=False):
+            self._change = changed_param
+            self._state = state
+            self._manual = manual
+
+        def __str__(self):
+            return str(self._state)
+
+        def changedParameter(self):
+            return self._change
+
+        def state(self):
+            return self._state
+
+        def isManual(self):
+            return self._manual
+
     class Iterator():
 
         def __init__(self, scan):
@@ -8,6 +27,8 @@ class Scan():
 
             self._index = {param: 0 for param in self._scan._parameters}
             self._valid = self._scan.count() > 0
+
+            self._last_change = None
 
         def __next__(self):
             if not self._valid:
@@ -17,9 +38,18 @@ class Scan():
             for param, idx in self._index.items():
                 result[param] = self._scan._values[param][idx]
 
+            # Handling of manually changed parameters
+            changed_param = self._last_change
+            if changed_param is None:
+                # Initial entry: check if any parameter is manual
+                manual = any(self._scan._manual.values())
+            else:
+                manual = self._scan._manual[changed_param]
+
             for param in reversed(self._scan._parameters):
                 if self._index[param]+1 < len(self._scan._values[param]):
                     self._index[param] += 1
+                    self._last_change = param
                     break
                 else:
                     self._index[param] = 0
@@ -28,12 +58,13 @@ class Scan():
                 # Therefore we have reached the last element!
                 self._valid = False
 
-            return result
+            return Scan.Entry(changed_param, result, manual)
 
     def __init__(self):
 
         self._parameters = []
         self._values = {}
+        self._manual = {}
 
     def count(self):
         if len(self._parameters) == 0:
@@ -45,7 +76,7 @@ class Scan():
 
         return total
 
-    def addParameter(self, param, values):
+    def addParameter(self, param, values, manual=False):
         if param in self._parameters:
             raise Exception(f'Trying to add parameter [{param}] a second time to scan!')
         if len(values) < 1:
@@ -53,6 +84,7 @@ class Scan():
 
         self._parameters.append(param)
         self._values[param] = values
+        self._manual[param] = manual
 
     def __iter__(self):
         return Scan.Iterator(self)

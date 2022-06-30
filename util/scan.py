@@ -20,8 +20,10 @@ parser.add_argument('--no-show', dest='show_plot', action='store_false',
                     help='Do not show the analysis plots at the end!')
 parser.add_argument('--abort-on-error', action='store_true',
                     help='Abort the scan if an error occurs.')
+parser.add_argument('--ignore-manual', action='store_true',
+                    help='Ignores any manual scan steps.')
 parser.add_argument('--batch', '-B', action='store_true',
-                    help='Combines --no-confirm, --abort-on-error and --no-show')
+                    help='Combines --no-confirm, --abort-on-error, --no-show and --ignore-manual')
 
 args = parser.parse_args()
 
@@ -85,15 +87,27 @@ run_time = 0
 
 scan = scanfile.getScan()
 total_entries = scan.count()
-for ee, entry in enumerate(scan):
-    log.log('SCAN', f'Scan entry [{ee} of {total_entries}]: {entry}')
+for ee, scan_entry in enumerate(scan):
+    log.log('SCAN', f'Scan entry [{ee} of {total_entries}]: {scan_entry}')
     if run_entries > 0:
         time_left = (total_entries - (ee+1))*run_time/run_entries
         log.log('SCAN', f'Time remaining: {int(time_left/60):02}:{int(time_left%60):02}')
     time_start = time.time()
 
+    # Handle change of manual parameters
+    if scan_entry.isManual() and not args.ignore_manual and not args.batch:
+        text = 'Initial step: Please adjust all manual paramters to their initial value!'
+        changed_param = scan_entry.changedParameter()
+        if changed_param is not None:
+            text = f'Manual step: Please change [{changed_param}] to: {scan_entry.state()[changed_param]}!'
+
+        result = pt.shortcuts.message_dialog(
+            title='Manual Scan Step - Continue?',
+            text=text
+        ).run()
+
     try:
-        setup.FromState(entry)
+        setup.FromState(scan_entry.state())
 
         # TODO extend for single acquisition
         wave = setup.scope.AcquireAverage()
