@@ -131,11 +131,11 @@ class ScanFile(ConfigFile):
                 definition = line[key]
 
                 # Detect parameter which is iterated manually
-                manual = False
                 if key.startswith('manual-'):
                     manual = True
-                    param = self.translate(key[len('manual-'):], strict=False)
+                    param = key
                 else:
+                    manual = False
                     param = self.translate(key)
 
                 if not isinstance(definition, list):
