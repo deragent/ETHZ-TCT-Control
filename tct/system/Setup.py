@@ -32,6 +32,9 @@ class Setup():
             self._system['code.git.branch'] = None
             self._system['code.git.dirty'] = None
 
+        # Container for manual states
+        self._manual = {}
+
         # Dummy state to allow for repetition of scans
         self.count = 0
 
@@ -52,6 +55,7 @@ class Setup():
         self.amp.ToState(state)
         self.bias.ToState(state)
 
+        state.update(self._manual)
         state.update(self._system)
 
         return state
@@ -65,6 +69,10 @@ class Setup():
 
         if 'count' in state:
             self.count = int(state['count'])
+
+        for key, value in state.items():
+            if key.startswith('manual-'):
+                self._manual[key] = value
 
     def Off(self):
         self.laser.LaserOff()
