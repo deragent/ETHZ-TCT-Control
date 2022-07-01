@@ -96,8 +96,9 @@ class ScanFile(ConfigFile):
         pass
 
 
-    def _parseScanValues(self, definition):
-        values = []
+    def _parseScanValues(self, definition, values=None):
+        if values is None:
+            values = []
 
         for entry in definition:
             if isinstance(entry, str):
@@ -113,6 +114,8 @@ class ScanFile(ConfigFile):
                 else:
                     raise Exception()
 
+            elif isinstance(entry, list):
+                self._parseScanValues(entry, values)
             else:
                 values.append(entry)
 
