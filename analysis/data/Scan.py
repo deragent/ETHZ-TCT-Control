@@ -19,6 +19,10 @@ class Scan():
         self.data = self.folder / 'data'
         self.plot = self.folder / 'plot'
 
+        for folder in [self.meta, self.data, self.plot]:
+            if not folder.is_dir():
+                raise Exception(f'Scan folder [{folder}] does not exist.')
+
         self._list = pd.read_csv(self.meta / 'list.csv')
 
         self._pp = preprocess
