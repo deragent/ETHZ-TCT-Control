@@ -4,6 +4,40 @@ import pandas as pd
 
 from .Scan import Scan
 
+class DataDirCollection():
+
+    def __init__(self, folder_list):
+
+        self._dirs = []
+        for folder in folder_list:
+            self._dirs.append(DataDir(folder))
+
+        self._rejoinInfo()
+
+    def _rejoinInfo(self):
+        infos = []
+        for dir in self._dirs:
+            infos.append(dir.scans())
+
+        self._info = pd.concat(infos, axis=0)
+
+    def reload(self):
+        for dir in self._dirs:
+            dir.reload()
+
+        self._rejoinInfo()
+
+    def scans(self):
+        return self._info
+
+    def scan(self, dataset):
+        for dir in self._dirs:
+            if dataset in dir._scans:
+                return dir.scan(dataset)
+
+        return None
+
+
 class DataDir():
 
     def __init__(self, folder):
