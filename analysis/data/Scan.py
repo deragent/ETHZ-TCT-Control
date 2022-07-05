@@ -1,4 +1,5 @@
 from pathlib import Path
+import yaml
 
 import numpy as np
 import pandas as pd
@@ -21,6 +22,10 @@ class Scan():
         self._list = pd.read_csv(self.meta / 'list.csv')
 
         self._pp = preprocess
+
+    def info(self):
+        with open(self.meta / 'info.yaml', 'r') as stream:
+            return yaml.safe_load(stream)
 
     def list(self):
         return self._list
