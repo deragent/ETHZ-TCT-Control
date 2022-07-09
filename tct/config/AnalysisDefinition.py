@@ -30,7 +30,11 @@ class AnalysisDefinition():
         'min()': ('Minimum Amplitude', 'max()', 'mV', 1e3),
         'max()': ('Maximum Amplitude', 'min()', 'mV', 1e3),
         'integral()': ('Pulse Integral', 'integral()', 'arb', 1e9),
-        'count': ('Repetition', 'Repeat', '', 1)
+        'count': ('Repetition', 'Repeat', '', 1),
+        'time': ('Time', 'Time', '', 1),
+        'temp.holder.stage': ('Stage Temperature', 'Stage', '°C', 1),
+        'temp.holder.temperature': ('Holder Temperature', 'Holder', '°C', 1),
+        'temp.holder.humidity': ('Holder Humidity', 'Holder', '%', 1),
     }
 
     def mapKey(self, key):
