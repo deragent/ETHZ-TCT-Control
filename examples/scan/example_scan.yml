@@ -44,6 +44,11 @@ scan:
   - focus: lin(77.8, 78.8, 21)
   - x: lin(0.3, 0.6, 21)
 
+# Wait 10s at each change of the HV bias
+constraints:
+  wait:
+    hv: 10
+
 analysis:
   - x: x
     plot: integral()

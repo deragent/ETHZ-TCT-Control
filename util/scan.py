@@ -106,6 +106,13 @@ for ee, scan_entry in enumerate(scan):
             text=text
         ).run()
 
+    # Handle of wait
+    if scan_entry.wait() > 0:
+        log.log('SCAN', f'Waiting for {scan_entry.wait()}s')
+        time.sleep(scan_entry.wait())
+        log.log('SCAN', f'Continue after wait.')
+
+
     try:
         setup.FromState(scan_entry.state())
 

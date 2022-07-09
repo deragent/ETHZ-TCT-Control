@@ -121,6 +121,18 @@ class ScanFile(ConfigFile):
 
         return values
 
+    def _parseWait(self, key):
+        wait = self._get(['constraints', 'wait', key], required=False)
+        if wait is not None:
+            wait = float(wait)
+            if wait < 0:
+                raise ConfigFile.ConfigError(self, f'Wait for key [{key}] must be positive!')
+        else:
+            wait = 0
+
+        return wait
+
+
     def getScan(self):
         scan = Scan()
 
@@ -133,6 +145,8 @@ class ScanFile(ConfigFile):
                 key = list(line.keys())[0]
                 definition = line[key]
 
+                wait = self._parseWait(key)
+
                 # Detect parameter which is iterated manually
                 if key.startswith('manual-'):
                     manual = True
@@ -144,7 +158,7 @@ class ScanFile(ConfigFile):
                 if not isinstance(definition, list):
                     definition = [definition]
 
-                scan.addParameter(param, self._parseScanValues(definition), manual=manual)
+                scan.addParameter(param, self._parseScanValues(definition), manual=manual, wait=wait)
 
             except:
                 raise ConfigFile.ConfigError(self, f'Error while parsing scan entry [{line}]')
