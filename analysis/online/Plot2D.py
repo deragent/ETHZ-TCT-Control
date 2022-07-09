@@ -31,7 +31,11 @@ class Plot2D(Plot):
 
     def isMonothonic(self, values):
         diff = np.diff(values)
-        return np.all(diff > 0) or np.all(diff < 0)
+
+        # This casting is necessary, to also allow usage with datetime values.
+        # Otherwise, the comparison bellow fails with a casting error.
+        zero = np.zeros(1).astype(diff.dtype)
+        return np.all(diff > zero[0]) or np.all(diff < zero[0])
 
 
     def _addERFFit(self, ax, x, y, color):

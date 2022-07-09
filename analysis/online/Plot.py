@@ -70,12 +70,21 @@ class Plot():
     def transform(self, key, values):
         _, _, _, factor = self.definition.getMeta(key)
 
-        return values*factor
+        if factor == 1:
+            # We explicitely exclude the multiplication here.
+            # This allows transparent usage also with datetime values, which
+            # do not implement a multiplication operator.
+            return values
+        else:
+            return values*factor
 
     def label(self, key):
         name, _, unit, _ = self.definition.getMeta(key)
 
-        return f'{name} [{unit}]'
+        if unit == '':
+            return f'{name}'
+        else:
+            return f'{name} [{unit}]'
 
     def legend(self, key, value):
         _, short, unit, factor = self.definition.getMeta(key)

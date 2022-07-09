@@ -23,7 +23,7 @@ class Scan():
             if not folder.is_dir():
                 raise Exception(f'Scan folder [{folder}] does not exist.')
 
-        self._list = pd.read_csv(self.meta / 'list.csv')
+        self._list = pd.read_csv(self.meta / 'list.csv', parse_dates=['time'])
 
         self._pp = preprocess
 
