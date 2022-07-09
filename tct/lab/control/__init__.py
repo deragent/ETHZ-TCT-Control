@@ -3,3 +3,4 @@ from .BiasSupplyControl import BiasSupplyControl
 from .ParticularsLaserControl import ParticularsLaserControl
 from .StageControl import StageControl
 from .ScopeControl import ScopeControl
+from. TemperatureControl import TemperatureControl

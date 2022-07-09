@@ -44,6 +44,7 @@ class Setup():
         self.amp = ParticularsAmplifierControl(log = self.log)
         self.bias = BiasSupplyControl(VLimit = vlimit, ILimit = ilimit, log = self.log)
         self.scope = ScopeControl(log = self.log)
+        self.temp = TemperatureControl(log = self.log)
 
     def ToState(self, state={}):
         state['time'] = datetime.now().isoformat()
@@ -54,6 +55,7 @@ class Setup():
         self.laser.ToState(state)
         self.amp.ToState(state)
         self.bias.ToState(state)
+        self.temp.ToState(state)
 
         state.update(self._manual)
         state.update(self._system)
@@ -66,6 +68,7 @@ class Setup():
         self.laser.FromState(state)
         self.amp.FromState(state)
         self.bias.FromState(state)
+        self.temp.FromState(state)
 
         if 'count' in state:
             self.count = int(state['count'])
