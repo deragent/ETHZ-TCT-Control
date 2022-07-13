@@ -31,6 +31,15 @@ class Scan():
         with open(self.meta / 'info.yaml', 'r') as stream:
             return yaml.safe_load(stream)
 
+    def plots(self):
+        plots = sorted(self.plot.glob('*.pdf'))
+        return [entry.stem for entry in plots]
+    def plotFile(self, plot):
+        if plot in self.plots():
+            return self.plot / (plot + '.pdf')
+        else:
+            return None
+
     def list(self):
         return self._list
 
