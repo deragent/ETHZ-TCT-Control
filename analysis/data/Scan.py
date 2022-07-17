@@ -92,16 +92,18 @@ class Scan():
         else:
             raise Exception(f'Unknown entry type [{type}]')
 
-    def retrieve(self, keys):
+    def retrieve(self, keys, index=None):
         list_keys = [key for key in keys if key in self._list]
         other_keys = [key for key in keys if key not in self._list]
 
         list_data = self._list.copy()[list_keys]
+        if index is not None:
+            list_data = list_data[index]
 
         for key in other_keys:
             data = []
 
-            for index, line in self._list.iterrows():
+            for index, line in list_data.iterrows():
                 # For now we only take the first curve into account.
                 if key in self.FUNCTIONS:
                     # For now we only take the first curve into account.
