@@ -6,11 +6,11 @@ from .Scan import Scan
 
 class DataDirCollection():
 
-    def __init__(self, folder_list):
+    def __init__(self, folder_list, use_cache=True, update_cache=True):
 
         self._dirs = []
         for folder in folder_list:
-            self._dirs.append(DataDir(folder))
+            self._dirs.append(DataDir(folder, use_cache=use_cache, update_cache=update_cache))
 
         self._rejoinInfo()
 
@@ -40,7 +40,10 @@ class DataDirCollection():
 
 class DataDir():
 
-    def __init__(self, folder):
+    def __init__(self, folder, use_cache=True, update_cache=True):
+
+        self._use_cache = use_cache
+        self._update_cache = update_cache
 
         self.folder = Path(folder)
         if not self.folder.is_dir():
@@ -55,7 +58,7 @@ class DataDir():
     def _loadScan(self, path):
         dataset = path.name
 
-        scan = Scan(path)
+        scan = Scan(path, use_cache=self._use_cache, update_cache=self._update_cache)
         info = scan.info()
 
         return dataset, info, scan

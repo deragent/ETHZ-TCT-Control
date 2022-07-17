@@ -1,5 +1,8 @@
 from pathlib import Path
 import yaml
+import atexit
+import hashlib
+import base64
 
 import numpy as np
 import pandas as pd
@@ -12,7 +15,7 @@ class Scan():
 
     FUNCTIONS = ['max()', 'min()', 'integral()']
 
-    def __init__(self, folder, preprocess=None):
+    def __init__(self, folder, preprocess=None, use_cache=True, update_cache=True):
         self.folder = Path(folder)
 
         self.meta = self.folder / 'meta'
@@ -26,6 +29,43 @@ class Scan():
         self._list = pd.read_csv(self.meta / 'list.csv', parse_dates=['time'])
 
         self._pp = preprocess
+
+        self._use_cache = use_cache
+        self._cache = {}
+        self._cacheChanged = False
+        self._loadCache()
+
+        if update_cache:
+            atexit.register(self._writeCache)
+
+    def _cacheID(self, data):
+        sha1 = hashlib.sha1(str(data).encode()).digest()
+        return base64.b64encode(sha1).decode()
+
+    # Using pandas.read_csv / to_csv for cache file access.
+    # This proved to be much faster than for example yaml!
+
+    def _loadCache(self):
+        cache_file = self.meta / '.fct.cache'
+        if cache_file.is_file():
+            df = pd.read_csv(cache_file, index_col=0)
+            self._cache = df.to_dict()['cache']
+
+    def _lookupCache(self, id):
+        if self._use_cache and id in self._cache:
+            return self._cache[id]
+
+        return None
+
+    def _setCache(self, id, value):
+        self._cache[id] = float(value)
+        self._cacheChanged = True
+
+    def _writeCache(self):
+        if self._cacheChanged:
+            df = pd.DataFrame.from_dict(self._cache, orient='index', columns=['cache'])
+            df.to_csv(self.meta / '.fct.cache')
+
 
     def info(self):
         with open(self.meta / 'info.yaml', 'r') as stream:
@@ -75,6 +115,12 @@ class Scan():
 
 
     def _applyFunction(self, fct, index, curve):
+        cache_id = self._cacheID((fct, index, curve, 'None' if self._pp is None else self._pp.__name__))
+
+        cache = self._lookupCache(cache_id)
+        if cache is not None:
+            return cache
+
         if index not in self._list.index:
             raise Exception(f'{self.folder}: Entry [{index}] does not exist!')
         entry = self.get(index)
@@ -96,10 +142,14 @@ class Scan():
         amplitude = amplitude[sel]
 
         if fct == 'min()':
-            return np.min(amplitude)
+            value = np.min(amplitude)
         elif fct == 'max()':
-            return np.max(amplitude)
+            value = np.max(amplitude)
         elif fct == 'integral()':
-            return np.trapz(amplitude, time)
+            value = np.trapz(amplitude, time)
         else:
             raise Exception(f'Unknwon function [{fct}]!')
+
+        self._setCache(cache_id, value)
+
+        return value
