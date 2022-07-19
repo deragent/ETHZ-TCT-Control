@@ -70,6 +70,11 @@ command_completer = pt.completion.NestedCompleter.from_nested_dict({
         'position': None,
         'state': None,
     },
+    'temp' : {
+        'stage': { 'temperature' },
+        'holder': { 'temperature', 'humidity' },
+        'state': None,
+    },
     'off': None,
     'exit': None,
     'quit': None,
@@ -80,6 +85,7 @@ stage = StageControl(log = log)
 laser = ParticularsLaserControl(log = log)
 amp = ParticularsAmplifierControl(log = log)
 bias = BiasSupplyControl(VLimit = args.vlimit, ILimit = args.ilimit*1e-3, log = log)
+temp = TemperatureControl(log = log)
 
 
 ## TODO add status rprompt
@@ -203,6 +209,16 @@ def handleStage(input):
 def handleScope(input):
     pass # TODO
 
+def handleTemp(input):
+
+    if input[0] in ['stage']:
+        print(f'= {temp.StageTemperature()}')
+
+    elif input[0] in ['holder']:
+        print(f'= {temp.HolderTemperature()}')
+
+    # TODO: Humidity, state printing
+
 
 
 # Run the main prompt
@@ -259,5 +275,7 @@ while 1:
         handleStage(commands[1:])
     elif commands[0] in ['scope']:
         handleScope(commands[1:])
+    elif commands[0] in ['temp']:
+        handleTemp(commands[1:])
 
 ## TODO handle safe shutdown if wanted
