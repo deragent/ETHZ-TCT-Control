@@ -71,6 +71,14 @@ class Scan():
         with open(self.meta / 'info.yaml', 'r') as stream:
             return yaml.safe_load(stream)
 
+    def configStr(self):
+        with open(self.meta / 'config.yaml', 'r') as stream:
+            return stream.read()
+    def config(self):
+        with open(self.meta / 'config.yaml', 'r') as stream:
+            return yaml.safe_load(stream)
+
+
     def plots(self):
         plots = sorted(self.plot.glob('*.pdf'))
         return [entry.stem for entry in plots]
