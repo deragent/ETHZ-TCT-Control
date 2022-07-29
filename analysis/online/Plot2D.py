@@ -101,4 +101,6 @@ class Plot2D(Plot):
         ax.set_xlabel(self.label(self.definition.x))
         ax.set_ylabel(self.label(self.definition.plot))
 
+        ax.grid()
+
         return fig, ax
