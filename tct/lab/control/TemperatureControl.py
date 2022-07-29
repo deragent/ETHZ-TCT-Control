@@ -34,5 +34,5 @@ class TemperatureControl():
 
     def HolderTemperature(self):
         return self.pi.holderTemperature()
-    def HolderHumiditiy(self):
+    def HolderHumidity(self):
         return self.pi.holderHumidity()

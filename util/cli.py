@@ -211,13 +211,20 @@ def handleScope(input):
 
 def handleTemp(input):
 
-    if input[0] in ['stage']:
-        print(f'= {temp.StageTemperature()}')
+    if input[0] in['stage', 'holder'] and len(input) == 2:
+        if input[0] in ['stage'] and input[1] in ['temp', 'temperature']:
+            print(f'= {temp.StageTemperature()}')
 
-    elif input[0] in ['holder']:
-        print(f'= {temp.HolderTemperature()}')
+        elif input[0] in ['holder'] and input[1] in ['temp', 'temperature']:
+            print(f'= {temp.HolderTemperature()}')
 
-    # TODO: Humidity, state printing
+        elif input[0] in ['holder'] and input[1] in ['hum', 'humidity']:
+            print(f'= {temp.HolderHumidity()}')
+
+    elif input[0] in ['state']:
+        print(f'Stage\tTemperature:\t{temp.StageTemperature():.2f}°C')
+        print(f'Holder\tTemperature:\t{temp.HolderTemperature():.2f}°C')
+        print(f'\tHumidity:\t{temp.HolderHumidity():.2f}%')
 
 
 
