@@ -21,7 +21,7 @@ class TemperatureControl():
     def ToState(self, state={}):
         state['temp.stage.temperature'] = self.StageTemperature()
         state['temp.holder.temperature'] = self.HolderTemperature()
-        state['temp.holder.humidity'] = self.HolderHumiditiy()
+        state['temp.holder.humidity'] = self.HolderHumidity()
 
         return state
 
