@@ -132,6 +132,10 @@ class ScanFile(ConfigFile):
 
         return wait
 
+    def _parseAutoScale(self, key):
+        auto = self._get(['constraints', 'autoscale', key], required=False)
+        return bool(auto)
+
 
     def getScan(self):
         scan = Scan()
@@ -146,6 +150,7 @@ class ScanFile(ConfigFile):
                 definition = line[key]
 
                 wait = self._parseWait(key)
+                autoscale = self._parseAutoScale(key)
 
                 # Detect parameter which is iterated manually
                 if key.startswith('manual-'):
@@ -158,7 +163,7 @@ class ScanFile(ConfigFile):
                 if not isinstance(definition, list):
                     definition = [definition]
 
-                scan.addParameter(param, self._parseScanValues(definition), manual=manual, wait=wait)
+                scan.addParameter(param, self._parseScanValues(definition), manual=manual, wait=wait, autoscale=autoscale)
 
             except:
                 raise ConfigFile.ConfigError(self, f'Error while parsing scan entry [{line}]')

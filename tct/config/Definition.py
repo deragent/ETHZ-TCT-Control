@@ -7,6 +7,7 @@ KEY_MAP = {
     'frequency': 'laser.frequency',
     'dac': 'laser.dac',
     'average': 'scope.average',
+    'amplitude': 'scope.amplitude',
     'repeat': 'count',
 }
 
@@ -19,4 +20,5 @@ SETUP_KEYS = [
     'frequency',
     'dac',
     'average',
+    'amplitude',
 ]
