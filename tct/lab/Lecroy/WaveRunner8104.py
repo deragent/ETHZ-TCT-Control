@@ -4,6 +4,20 @@ from ..generic import InterfaceVXI11
 
 class WaveRunner8104(InterfaceVXI11):
 
+    N_DIV = 8
+
+    class SCALE:
+        all = [0.001, 0.002, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1, 2, 5, 10]
+
+        def find(value):
+            scale = WaveRunner8104.SCALE.all[-1]
+            for s in reversed(WaveRunner8104.SCALE.all):
+                if s > value:
+                    scale = s
+                else:
+                    break
+            return scale
+
     class FUNCTION:
         all = ['f1', 'f2', 'f3', 'f4', 'f5', 'f6', 'f7', 'f8']
         F1 = 'f1'
@@ -80,6 +94,19 @@ class WaveRunner8104(InterfaceVXI11):
 
     def GetAverage(self, channel):
         return int(self._vbsQuery(f'app.Acquisition.{channel}.AverageSweeps'))
+
+    def FindScale(self, channel):
+        return self._vbsCMD(f'app.Acquisition.{channel}.FindScale')
+
+    def VerOffset(self, channel, offset):
+        return self._vbsCMD(f'app.Acquisition.{channel}.VerOffset = {offset}')
+    def VerScale(self, channel, scale):
+        return self._vbsCMD(f'app.Acquisition.{channel}.VerScale = {scale}')
+
+    def GetVerOffset(self, channel):
+        return float(self._vbsQuery(f'app.Acquisition.{channel}.VerOffset'))
+    def GetVerScale(self, channel):
+        return float(self._vbsQuery(f'app.Acquisition.{channel}.VerScale'))
 
 
     ## Handle channel sweeps
