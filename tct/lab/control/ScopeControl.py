@@ -52,14 +52,27 @@ class ScopeControl():
         # TODO this should call a higher order function in ScopeControl
         state['scope.average'] = self.scope.GetAverage(self.CH)
 
+        # TODO implement
+        # state['scope.time'] = self.GetHorRange()
+
+        state['scope.amplitude'] = self.GetVertRange()
+
         return state
 
     def FromState(self, state):
         if 'scope.average' in state:
-            # TODO this should call a higher order function in ScopeControl
-            self.scope.Average(self.CH, state['scope.average'])
+            self.SetAverage(state['scope.average'])
 
-        # TODO properly implement
+        if 'scope.amplitude' in state:
+            range = state['scope.amplitude']
+            try:
+                self.SetVertRange(( float(range[0]), float(range[1]) ))
+            except (TypeError, ValueError) as e:
+                self.log('ERROR', f'`scope.amplitude` is not properly structured: [{range}]!')
+
+        if 'scope.time' in state:
+            # TODO implement
+            pass
 
     def Reset(self):
         # TODO
@@ -69,13 +82,10 @@ class ScopeControl():
         # TODO
         pass
 
-    def SetupSingle(self):
-        # TODO
-        pass
-
-    def SetupAverage(self):
-        # TODO
-        pass
+    def SetAverage(self, navg):
+        if self.scope.GetAverage(self.CH) != navg and navg > 0:
+            self.log('Scope', f'Set Average to [{navg}].')
+            self.scope.Average(self.CH, navg)
 
     # TODO Implement auto scale of Y-Axis
 
