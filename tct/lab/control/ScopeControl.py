@@ -1,6 +1,8 @@
 import lecroyparser
 import time
 
+import numpy as np
+
 from ..Lecroy import WaveRunner8104
 
 class ScopeControl():
@@ -85,6 +87,63 @@ class ScopeControl():
         raw = self.scope.Waveform(self.CH)
         return lecroyparser.ScopeData(data=raw)
 
+
+    def GetVertRange(self):
+        scale = self.scope.GetVerScale(self.CH)
+        offset = self.scope.GetVerOffset(self.CH)
+
+        return (-0.5*self.scope.N_DIV*scale - offset, 0.5*self.scope.N_DIV*scale - offset)
+
+    def SetVertRange(self, range):
+        self.log('Scope', f'Require vertical range of {range}.')
+
+        scale = self.scope.SCALE.find((range[1]-range[0])/self.scope.N_DIV)
+        offset = -1*(range[1]+range[0])/2
+
+        self.log('Scope', f'Set vertical axis to {scale} V/div + {offset} V.')
+        self.scope.VerScale(self.CH, scale)
+        self.scope.VerOffset(self.CH, offset)
+
+
+    def AutoScale(self):
+        self.log('Scope', 'Auto find vertical scale.')
+
+        ## Alternative (slower) implementation via the built in FindScale function
+        # num_average = self.scope.GetAverage(self.CH)
+        # self.scope.Average(self.CH, 1)
+        # self.scope.ClearSweeps(self.CH)
+        # self.scope.WaitUntilIdle(1)
+        #
+        # self.scope.FindScale(self.CH)
+        # self.scope.WaitUntilIdle(1)
+        #
+        # self.scope.Average(self.CH, num_average)
+        
+
+        # Set initial scale: -2.5V / 2.5V
+        # This should fit any TCT signal, as the amplifier limits before that.
+        self.scope.VerOffset(self.CH, 0)
+        self.scope.VerScale(self.CH, 0.5)
+
+        # Get a single (non averaged trigger)
+        num_average = self.scope.GetAverage(self.CH)
+        self.scope.TriggerMode(WaveRunner8104.TRIGGER_MODE.STOP)
+        self.scope.Average(self.CH, 1)
+        self.scope.ClearSweeps(self.CH)
+        self.scope.WaitUntilIdle(1)
+
+        while True:
+            if self.scope.Acquire(10):
+                break
+
+        # Set range based on acquired waveform
+        wave = self._readWaveform()
+        range = (np.min(wave.y)*1.5, np.max(wave.y)*1.5)
+
+        self.SetVertRange(range)
+
+        self.scope.Average(self.CH, num_average)
+        self.scope.TriggerMode(WaveRunner8104.TRIGGER_MODE.NORMAL)
 
     def AcquireAverage(self):
         # Clear the previous sweeps
