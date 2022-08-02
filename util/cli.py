@@ -3,6 +3,7 @@
 import prompt_toolkit as pt
 import argparse
 import sys
+import subprocess
 
 import numpy as np
 
@@ -74,6 +75,10 @@ command_completer = pt.completion.NestedCompleter.from_nested_dict({
         'stage': { 'temperature' },
         'holder': { 'temperature', 'humidity' },
         'state': None,
+    },
+    'view' : {
+        'open': None,
+        'close': None,
     },
     'off': None,
     'exit': None,
@@ -227,6 +232,19 @@ def handleTemp(input):
         print(f'\tHumidity:\t{temp.HolderHumidity():.2f}%')
 
 
+# This is very hacky for now!
+viewer = None
+def handleView(input):
+    global viewer
+
+    if input[0] in ['open'] and viewer is None:
+        viewer = subprocess.Popen([sys.executable, "-m", "util.viewer"], stdin=subprocess.PIPE)
+    elif input[0] in ['close'] and viewer is not None:
+        viewer.terminate()
+        viewer = None
+
+    # TODO need to handle the scope commands (average, amplitude etc.)
+
 
 # Run the main prompt
 while 1:
@@ -284,5 +302,7 @@ while 1:
         handleScope(commands[1:])
     elif commands[0] in ['temp']:
         handleTemp(commands[1:])
+    elif commands[0] in ['view', 'viewer']:
+        handleView(commands[1:])
 
 ## TODO handle safe shutdown if wanted
