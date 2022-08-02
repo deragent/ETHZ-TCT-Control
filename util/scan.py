@@ -115,7 +115,9 @@ for ee, scan_entry in enumerate(scan):
             time.sleep(scan_entry.wait())
             log.log('SCAN', f'Continue after wait.')
 
-        # TODO extend for single acquisition
+        if scan_entry.isAutoScale():
+            setup.scope.AutoScale()
+
         wave = setup.scope.AcquireAverage()
 
         # Store the metadata and acquired curve
