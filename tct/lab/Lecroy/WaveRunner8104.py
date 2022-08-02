@@ -12,7 +12,7 @@ class WaveRunner8104(InterfaceVXI11):
         def find(value):
             scale = WaveRunner8104.SCALE.all[-1]
             for s in reversed(WaveRunner8104.SCALE.all):
-                if s > value:
+                if s >= value*0.999:
                     scale = s
                 else:
                     break
