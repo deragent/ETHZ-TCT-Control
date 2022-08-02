@@ -38,6 +38,8 @@ class ScopeControl():
         self.scope.COMMHeader(on=False)
         self.scope.COMMFormat(['off', 'byte', 'bin'])
 
+        # TODO do check and setup if necessary
+
     def __del__(self):
         self.scope = None
 
@@ -45,6 +47,16 @@ class ScopeControl():
         if self._log is not None:
             self._log.log(cat, msg)
 
+    def check(self):
+        # TODO Implement
+        # - Check CH2 active
+        # - Check CH2 DC-50Ohm
+        # - Check CH2 No BW limit
+        # - Check Acquisition at 20GSps
+        # - Check Trigger Ext
+        # - Check Trigger Edge Pos @ -500mV
+
+        pass
 
     def ToState(self, state={}):
         # TODO properly implement
