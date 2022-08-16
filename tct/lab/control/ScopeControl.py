@@ -36,7 +36,7 @@ class ScopeControl():
         self.CH = WaveRunner8104.CHANNEL.C2
 
         self.scope.COMMHeader(on=False)
-        self.scope.COMMFormat(['off', 'byte', 'bin'])
+        self.scope.COMMFormat(['off', 'word', 'bin'])
 
         # TODO do check and setup if necessary
 
@@ -140,7 +140,7 @@ class ScopeControl():
         # self.scope.WaitUntilIdle(1)
         #
         # self.scope.Average(self.CH, num_average)
-        
+
 
         # Set initial scale: -2.5V / 2.5V
         # This should fit any TCT signal, as the amplifier limits before that.
