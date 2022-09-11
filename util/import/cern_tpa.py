@@ -1,10 +1,5 @@
-from tct.data import DataDir
-from tct.config.ConfigFile import ConfigMemory
-
 import numpy as np
 import pandas as pd
-
-import matplotlib.pyplot as plt
 
 import yaml
 import datetime
@@ -70,6 +65,10 @@ if __name__ == "__main__":
 
     import argparse
 
+    from tct.logger import Logger
+    from tct.data import DataDir
+    from tct.config.ConfigFile import ConfigMemory
+
     # Parse the command line arguments
     parser = argparse.ArgumentParser(description='Utility to import a CERN-SSD-TPA data file (version 1.4).')
     parser.add_argument('input',
@@ -92,10 +91,14 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
 
-
     FILE = Path(args.input)
 
+    datadir = DataDir(args.data)
+    log = Logger([datadir.global_log], print=True, debug=False)
+
     with open(FILE, 'r') as stream:
+
+        log.log('TPA-IMPORT', f'Openend file [{FILE}] for import.')
 
         readSeparator(stream)
         readHeader(stream)
@@ -158,6 +161,9 @@ if __name__ == "__main__":
 
         NRecord = int(setup_parameters['RecordLength'])
 
+        log.log('TPA-IMPORT', f'File contains {NScan} scans.')
+        log.log('TPA-IMPORT', f'Record length is {NRecord} samples.')
+
         ## Read the state header
         readSeparator(stream)
         state_names = stream.readline().strip().split(' ')
@@ -182,6 +188,7 @@ if __name__ == "__main__":
         if len(scan_data.index) != 2*NScan:
             raise Exception(f'Expected [{NScan}] scan points, only [{len(state_data.index)/2}] data rows were found!')
 
+        log.log('TPA-IMPORT', f'Data file loaded succesfully.')
 
     start_time = datetime.datetime.strptime(setup_parameters['startTime'], '%Y_%m_%d_%H_%M_%S')
 
@@ -217,8 +224,10 @@ if __name__ == "__main__":
     if args.write_data:
 
         # Create a new scan with given name and start-time
-        datadir = DataDir(args.data)
         scan = datadir.createScan(dataset_name, start_time)
+
+        log.log('TPA-IMPORT', f'Write data to scan [{scan.entry}]')
+        log.log('TPA-IMPORT', f'Folder: {scan.folder}')
 
         scan.writeMetaData(info)
         scan.saveConfig(config)
@@ -255,3 +264,6 @@ if __name__ == "__main__":
             data_file.close()
 
         scan.writeList()
+
+        log.log('TPA-IMPORT', f'{NScan} scans written succesfully.')
+        log.log('TPA-IMPORT', 'Import complete!')
