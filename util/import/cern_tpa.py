@@ -1,4 +1,5 @@
-from tct.data.output import FileHDF5
+from tct.data import DataDir
+from tct.config.ConfigFile import ConfigMemory
 
 import numpy as np
 import pandas as pd
@@ -182,13 +183,15 @@ if __name__ == "__main__":
             raise Exception(f'Expected [{NScan}] scan points, only [{len(state_data.index)/2}] data rows were found!')
 
 
+    start_time = datetime.datetime.strptime(setup_parameters['startTime'], '%Y_%m_%d_%H_%M_%S')
+
     dataset_name = FILE.stem
     if args.name is not None:
         dataset_name = args.name
 
     ## Create the Info data structure
     info = {
-        'aperture': None,
+        'aperture': '-',
         'description':
             'CERN-TPA: '+ setup_parameters['comment']
             + (f'-- {args.description}' if args.description is not None else ''),
@@ -198,73 +201,57 @@ if __name__ == "__main__":
         # Hard coded for the CERN TPA measurements in August 2022
         'sample': sample_parameters['Sample'].split('_')[1],
         'wafer': sample_parameters['Sample'].split('_')[0],
-        # Need to manually set this!
         'side': args.side,
     }
 
 
     ## Create the Config data structure
     # For now just reference the CERN setup
-    config = {
+    config = ConfigMemory({
         'meta': info,
         'extern': 'CERN-TPA',
         'scan': [{param: vectors[param].tolist()} for param in vectors],
-    }
-
-    ## Create the list data
-    start_time = datetime.datetime.strptime(setup_parameters['startTime'], '%Y_%m_%d_%H_%M_%S')
-
-    list = {
-        '_prefix': [f'A{n}' for n in range(NScan)],
-        '_type': ['hdf5' for n in range(NScan)],
-        'time': [start_time + datetime.timedelta(seconds=offset*1e-3) for offset in state_data['timestamp']],
-        'count': state_data['repetition'],
-        'scope.average': [int(setup_parameters['numOfAvge']) for n in range(NScan)],
-        'stage.x': state_data['x[mm]'],
-        'stage.y': state_data['y[mm]'],
-        'stage.z': state_data['z[mm]'],
-        'stage.u': state_data['u[deg]'],
-        'stage.v': state_data['v[deg]'],
-        'stage.w': state_data['w[deg]'],
-        'laser.frequency': [float(setup_parameters['repFrequ']) for n in range(NScan)],
-        'laser.state': [setup_parameters['LASER'] == 'ON' for n in range(NScan)],
-        'bias.hv': state_data['Vset[V]'],
-        'bias.state': [setup_parameters['HVPS'] == 'ON' for n in range(NScan)],
-        'bias.current': state_data['I[mA]']*1e-3,
-        'temp.holder.temperature': state_data['PCB_T[C]'],
-        'steup.hostname': ['CERN-SSD-TPA' for n in range(NScan)],
-    }
-
-    list_df = pd.DataFrame(list)
+    })
 
 
     if args.write_data:
-        ## Store all the data into files
-        output_dir = Path(f'output/{FILE.stem}')
-        output_dir.mkdir(parents=True, exist_ok=True)
 
-        meta_dir = (output_dir / 'meta')
-        plot_dir = (output_dir / 'plot')
-        data_dir = (output_dir / 'data')
+        # Create a new scan with given name and start-time
+        datadir = DataDir(args.data)
+        scan = datadir.createScan(dataset_name, start_time)
 
-        for dir in [meta_dir, plot_dir, data_dir]:
-            dir.mkdir(exist_ok=True)
-
-        # Write Meta-Data
-        with  (meta_dir / 'info.yaml').open('w') as out:
-            out.write(yaml.dump(info))
-
-        with  (meta_dir / 'config.yaml').open('w') as out:
-            out.write(yaml.dump(config))
-
-        list_df.to_csv(meta_dir / 'list.csv')
+        scan.writeMetaData(info)
+        scan.saveConfig(config)
 
 
         # Write the Data
         time = np.array(range(0, NRecord))*float(setup_parameters['SamplingPeriod[s]'])
 
         for aa in range(NScan):
-            data_file = FileHDF5(data_dir / f'A{aa}')
+            state = {
+                'time': (start_time + datetime.timedelta(seconds=state_data['timestamp'][aa]*1e-3)).isoformat(),
+                'count': state_data['repetition'][aa],
+                'scope.average': int(setup_parameters['numOfAvge']),
+                'stage.x': state_data['x[mm]'][aa],
+                'stage.y': state_data['y[mm]'][aa],
+                'stage.z': state_data['z[mm]'][aa],
+                'stage.u': state_data['u[deg]'][aa],
+                'stage.v': state_data['v[deg]'][aa],
+                'stage.w': state_data['w[deg]'][aa],
+                'laser.frequency': float(setup_parameters['repFrequ']),
+                'laser.state': setup_parameters['LASER'] == 'ON',
+                'bias.hv': state_data['Vset[V]'][aa],
+                'bias.state': setup_parameters['HVPS'] == 'ON',
+                'bias.current': state_data['I[mA]'][aa]*1e-3,
+                'temp.holder.temperature': state_data['PCB_T[C]'][aa],
+                'steup.hostname': 'CERN-SSD-TPA',
+            }
+
+            data_file = scan.addEntry(state)
+            data_file.storeMetaData(state)
+
             data_file.storeCurve(time, scan_data.loc[aa*2, :])
             data_file.storeCurve(time, scan_data.loc[aa*2 + 1, :])
             data_file.close()
+
+        scan.writeList()
