@@ -146,7 +146,6 @@ class Scan():
             amplitude = amplitude - offset
         else:
             amplitude = self._pp.Full(time, amplitude)
-            amplitude = self._pp.RemoveReflection(time, amplitude)
 
         time = time[sel]
         amplitude = amplitude[sel]
