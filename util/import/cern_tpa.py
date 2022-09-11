@@ -67,10 +67,32 @@ def readVector(stream, param):
 
 if __name__ == "__main__":
 
+    import argparse
+
+    # Parse the command line arguments
+    parser = argparse.ArgumentParser(description='Utility to import a CERN-SSD-TPA data file (version 1.4).')
+    parser.add_argument('input',
+                        help='The TPA data file to be imported!')
+
+    parser.add_argument('--data', '-D', default='./_data',
+                        help='The directory where the scan data will be placed. Will be created if not existing! Default: [./_data]')
+
+    parser.add_argument('--no-save', dest='write_data', action='store_false',
+                        help='Do not write out any data. This allows to verify the correct loading of a TPA data file.')
+
+    parser.add_argument('--name',
+                        help='Store the imported data with the given dataset name.')
+
+    parser.add_argument('--side', default='NA',
+                        help='Sets the side attribute of the used sample.')
+    parser.add_argument('--description', default=None,
+                        help='Adds additonal description data.')
+
+    args = parser.parse_args()
 
 
-    FILE = Path("../Data/2022_08_19_13_59_21_P301401_E2.txt")
 
+    FILE = Path(args.input)
 
     with open(FILE, 'r') as stream:
 
@@ -160,18 +182,24 @@ if __name__ == "__main__":
             raise Exception(f'Expected [{NScan}] scan points, only [{len(state_data.index)/2}] data rows were found!')
 
 
+    dataset_name = FILE.stem
+    if args.name is not None:
+        dataset_name = args.name
+
     ## Create the Info data structure
     info = {
         'aperture': None,
-        'description': 'CERN-TPA: '+ setup_parameters['comment'],
+        'description':
+            'CERN-TPA: '+ setup_parameters['comment']
+            + (f'-- {args.description}' if args.description is not None else ''),
         'laser': 'CERN-TPA 1550nm',
-        'name': FILE.stem,
+        'name': dataset_name,
         'operator': setup_parameters['user'],
         # Hard coded for the CERN TPA measurements in August 2022
         'sample': sample_parameters['Sample'].split('_')[1],
         'wafer': sample_parameters['Sample'].split('_')[0],
         # Need to manually set this!
-        'side': 'TODO',
+        'side': args.side,
     }
 
 
@@ -210,32 +238,33 @@ if __name__ == "__main__":
     list_df = pd.DataFrame(list)
 
 
-    ## Store all the data into files
-    output_dir = Path(f'output/{FILE.stem}')
-    output_dir.mkdir(parents=True, exist_ok=True)
+    if args.write_data:
+        ## Store all the data into files
+        output_dir = Path(f'output/{FILE.stem}')
+        output_dir.mkdir(parents=True, exist_ok=True)
 
-    meta_dir = (output_dir / 'meta')
-    plot_dir = (output_dir / 'plot')
-    data_dir = (output_dir / 'data')
+        meta_dir = (output_dir / 'meta')
+        plot_dir = (output_dir / 'plot')
+        data_dir = (output_dir / 'data')
 
-    for dir in [meta_dir, plot_dir, data_dir]:
-        dir.mkdir(exist_ok=True)
+        for dir in [meta_dir, plot_dir, data_dir]:
+            dir.mkdir(exist_ok=True)
 
-    # Write Meta-Data
-    with  (meta_dir / 'info.yaml').open('w') as out:
-        out.write(yaml.dump(info))
+        # Write Meta-Data
+        with  (meta_dir / 'info.yaml').open('w') as out:
+            out.write(yaml.dump(info))
 
-    with  (meta_dir / 'config.yaml').open('w') as out:
-        out.write(yaml.dump(config))
+        with  (meta_dir / 'config.yaml').open('w') as out:
+            out.write(yaml.dump(config))
 
-    list_df.to_csv(meta_dir / 'list.csv')
+        list_df.to_csv(meta_dir / 'list.csv')
 
 
-    # Write the Data
-    time = np.array(range(0, NRecord))*float(setup_parameters['SamplingPeriod[s]'])
+        # Write the Data
+        time = np.array(range(0, NRecord))*float(setup_parameters['SamplingPeriod[s]'])
 
-    for aa in range(NScan):
-        data_file = FileHDF5(data_dir / f'A{aa}')
-        data_file.storeCurve(time, scan_data.loc[aa*2, :])
-        data_file.storeCurve(time, scan_data.loc[aa*2 + 1, :])
-        data_file.close()
+        for aa in range(NScan):
+            data_file = FileHDF5(data_dir / f'A{aa}')
+            data_file.storeCurve(time, scan_data.loc[aa*2, :])
+            data_file.storeCurve(time, scan_data.loc[aa*2 + 1, :])
+            data_file.close()
