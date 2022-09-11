@@ -7,7 +7,7 @@ class FileHDF5(TCTOutput):
 
     def __init__(self, prefix):
         super().__init__(prefix)
-        
+
         self.stream = None
 
         self.file = prefix.parent / f'{prefix.name}.hdf5'
@@ -30,8 +30,10 @@ class FileHDF5(TCTOutput):
         for key, value in metadata.items():
             self.stream.attrs[key] = value
 
-
-    def __del__(self):
+    def close(self):
         if self.stream:
             self.stream.close()
             self.stream = None
+
+    def __del__(self):
+        self.close()

@@ -72,3 +72,13 @@ class ConfigFile():
                 return key
 
         return KEY_MAP[key]
+
+
+class ConfigMemory(ConfigFile):
+
+    def __init__(self, data):
+        self._file = None
+        self._data = data
+
+    def copy(self, file):
+        return self.write(file)

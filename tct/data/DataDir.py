@@ -77,12 +77,16 @@ class DataDir():
 
         self.global_log = self.folder / 'log.txt'
 
-    def createScan(self, name):
-        slug = slugify.slugify(name, max_length=30)
+    def createScan(self, name, date=None):
+        # date can be provide, to be used in data import
 
-        # This should ensure, that we have a new unique folder name
-        time.sleep(1)
-        entry = f'{datetime.now():%Y%m%d-%H%M%S}_{slug}'
+        if date is None:
+            # This should ensure, that we have a new unique folder name
+            time.sleep(1)
+            date = datetime.now()
+
+        slug = slugify.slugify(name, max_length=30)
+        entry = f'{date:%Y%m%d-%H%M%S}_{slug}'
 
         return ScanDir(self.folder, entry, self)
 
