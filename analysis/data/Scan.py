@@ -123,6 +123,16 @@ class Scan():
 
         return list_data
 
+    def _applyPreprocess(self, time, amplitude):
+        if self._pp is None:
+            offset = np.mean(amplitude[time < 0])
+
+            amplitude = amplitude - offset
+        else:
+            amplitude = self._pp.Full(time, amplitude)
+
+        return time, amplitude
+
 
     def _applyFunction(self, fct, index, curve):
         cache_id = self._cacheID((fct, index, curve, 'None' if self._pp is None else self._pp.__name__))
@@ -138,14 +148,9 @@ class Scan():
             raise Exception(f'{self.folder}: Curve [{curve}] for entry [{index}] does not exist!')
 
         time, amplitude = entry.curve(curve)
+        time, amplitude = self._applyPreprocess(time, amplitude)
+
         sel = time >= 0
-
-        if self._pp is None:
-            offset = np.mean(amplitude[time < 0])
-
-            amplitude = amplitude - offset
-        else:
-            amplitude = self._pp.Full(time, amplitude)
 
         time = time[sel]
         amplitude = amplitude[sel]
