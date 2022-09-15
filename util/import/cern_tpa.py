@@ -232,10 +232,11 @@ if __name__ == "__main__":
         scan.writeMetaData(info)
         scan.saveConfig(config)
 
+        # Calculate Time Vector
+        # Use constant 6ns offset to give samples for automatic offset compensation!
+        time = np.array(range(0, NRecord))*float(setup_parameters['SamplingPeriod[s]']) - 6e-9
 
-        # Write the Data
-        time = np.array(range(0, NRecord))*float(setup_parameters['SamplingPeriod[s]'])
-
+        # Write the data
         for aa in range(NScan):
             state = {
                 'time': (start_time + datetime.timedelta(seconds=state_data['timestamp'][aa]*1e-3)).isoformat(),
