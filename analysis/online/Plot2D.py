@@ -1,11 +1,7 @@
 import numpy as np
-import scipy.optimize
-import scipy.stats
 
 from .Plot import Plot
-
-def ERF(x, A, B, mu, sigma):
-    return A*scipy.stats.norm.cdf(x, mu, sigma) + B
+from ..fit import ERF
 
 class Plot2D(Plot):
 
@@ -40,16 +36,13 @@ class Plot2D(Plot):
 
     def _addERFFit(self, ax, x, y, color):
         try:
-            B0 = y[0] # np.min(y)
-            A0 = y[-1] - B0 # np.max(y) - B0
-            mu0 = x[np.argmax(y - B0 >= 0.5*A0)]
-
-            A, B, mu, sigma = scipy.optimize.curve_fit(ERF, x, y, p0=[A0, B0, mu0, 0.02])[0]
+            fit = ERF(x, y)
+            sigma = fit.param['sigma']
 
             xfit = np.linspace(np.min(x), np.max(x), 101)
             # The factor of 1e3 (mm -> um) is hardcoded here.
             # This is ok for now, as the main function of this fit is to find the focused beam size (in the order of 10um)
-            ax.plot(xfit, ERF(xfit, A, B, mu, sigma), color=color, linestyle='--', label=f'sig = {sigma*1e3:.3f}')
+            ax.plot(xfit, fit.eval(xfit), color=color, linestyle='--', label=f'sig = {sigma*1e3:.3f}')
 
             return True
         except Exception as e:
