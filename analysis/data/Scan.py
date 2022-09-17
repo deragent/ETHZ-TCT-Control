@@ -14,6 +14,7 @@ class Scan():
     TYPE_HDF5 = 'hdf5'
 
     FUNCTIONS = ['max()', 'min()', 'integral()']
+    CURVES = ['curve[0]', 'curve[1]']
 
     def __init__(self, folder, preprocess=None, use_cache=True, update_cache=True):
         self.folder = Path(folder)
@@ -109,19 +110,45 @@ class Scan():
             list_data = list_data[index]
 
         for key in other_keys:
-            data = []
 
-            for index, line in list_data.iterrows():
-                # For now we only take the first curve into account.
-                if key in self.FUNCTIONS:
+            if key in self.CURVES:
+                time_data = []
+                amplitude_data = []
+
+                number = int(key.split('[', 1)[1].replace(']', ''))
+
+                for index, line in list_data.iterrows():
+                    time, amplitude = self._getCurve(index, number)
+                    time_data.append(time)
+                    amplitude_data.append(amplitude)
+
+                list_data[f'time[{number}]'] = time_data
+                list_data[f'amplitude[{number}]'] = amplitude_data
+
+
+            elif key in self.FUNCTIONS:
+                data = []
+
+                for index, line in list_data.iterrows():
                     # For now we only take the first curve into account.
                     data.append(self._applyFunction(key, index, 0))
-                else:
-                    raise Exception(f'Unknown function type [{key}]')
 
-            list_data[key] = data
+                list_data[key] = data
+
+            else:
+                raise Exception(f'Unknown function/ curve type [{key}]')
 
         return list_data
+
+    def _getCurve(self, index, number):
+        entry = self.get(index)
+        if number >= entry.count():
+            raise Exception(f'{self.folder}: Curve [{number}] for entry [{index}] does not exist!')
+
+        time, amplitude = entry.curve(number)
+        time, amplitude = self._applyPreprocess(time, amplitude)
+
+        return time, amplitude
 
     def _applyPreprocess(self, time, amplitude):
         if self._pp is None:
@@ -143,15 +170,10 @@ class Scan():
 
         if index not in self._list.index:
             raise Exception(f'{self.folder}: Entry [{index}] does not exist!')
-        entry = self.get(index)
-        if curve >= entry.count():
-            raise Exception(f'{self.folder}: Curve [{curve}] for entry [{index}] does not exist!')
 
-        time, amplitude = entry.curve(curve)
-        time, amplitude = self._applyPreprocess(time, amplitude)
+        time, amplitude = self._getCurve(index, curve)
 
         sel = time >= 0
-
         time = time[sel]
         amplitude = amplitude[sel]
 
