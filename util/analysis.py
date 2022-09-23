@@ -14,7 +14,7 @@ parser.add_argument('--output', '-O', default=None,
                     help='Ouptput directory, where the plots will be written. If not given, will be written to the scan data directory. Also see `--save`.')
 
 parser.add_argument('--save', dest='save_plot', action='store_true',
-                    help='Do not write the plots to the scan data directory.')
+                    help='Write the plots to the given output directory.')
 
 parser.add_argument('--no-show', dest='show_plot', action='store_false',
                     help='Do not show the analysis plots at the end!')
