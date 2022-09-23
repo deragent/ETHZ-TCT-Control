@@ -18,6 +18,7 @@ class Scan():
 
     def __init__(self, folder, preprocess=None, use_cache=True, update_cache=True):
         self.folder = Path(folder)
+        self.entry = self.folder.name
 
         self.meta = self.folder / 'meta'
         self.data = self.folder / 'data'
