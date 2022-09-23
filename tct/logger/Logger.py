@@ -16,11 +16,15 @@ class Logger():
             self.out.append(open(file, 'a'))
             self.log("LOGGER", f"Opened the file [{self.files[ff]}].")
 
-    def __del__(self):
+    def close(self):
         for ff, stream in enumerate(self.out):
             if stream and not stream.closed:
                 self.log("LOGGER", f"Closed the file [{self.files[ff]}].")
                 stream.close()
+        self.stream = []
+
+    def __del__(self):
+        self.close()
 
     def log(self, cat, msg):
         line = "(%s) [%s]: %s"%(time.strftime("%Y-%m-%d %H:%M:%S"), cat, '\n>> '.join(msg.split('\n')))
