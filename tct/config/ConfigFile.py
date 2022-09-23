@@ -41,7 +41,7 @@ class ConfigFile():
 
     def write(self, file):
         with open(file, 'w') as stream:
-            yaml.dump(self._data, stream)
+            yaml.dump(self._data, stream, sort_keys=False)
 
     def copy(self, file):
         return shutil.copy(self._file, file)

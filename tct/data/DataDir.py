@@ -46,7 +46,7 @@ class ScanDir():
 
     def writeMetaData(self, metadata):
         with open(self.meta / 'info.yaml', 'w') as stream:
-            yaml.dump(metadata, stream)
+            yaml.dump(metadata, stream, sort_keys=False)
 
     def writeList(self):
         data = pd.DataFrame.from_dict(self._list)
