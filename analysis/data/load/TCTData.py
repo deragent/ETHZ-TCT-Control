@@ -11,3 +11,6 @@ class TCTData():
 
     def curve(self, idx):
         raise NotImplementedError()
+
+    def copy(self, target):
+        raise NotImplementedError()
