@@ -48,8 +48,12 @@ class ScanDir():
         with open(self.meta / 'info.yaml', 'w') as stream:
             yaml.dump(metadata, stream, sort_keys=False)
 
-    def writeList(self):
-        data = pd.DataFrame.from_dict(self._list)
+    def writeList(self, list=None):
+        # list can be used to pass in an externally generated list
+        # For example when concatenating scans
+        if list is None:
+            list = self._list
+        data = pd.DataFrame.from_dict(list)
         data.to_csv(self.meta / 'list.csv')
 
     def addEntry(self, state):
