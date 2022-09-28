@@ -13,7 +13,7 @@ class ERF():
 
         return ERF
 
-    def __init__(self, x, y, selection=None, p0={}):
+    def __init__(self, x, y, selection=None, p0={}, debug=True):
 
         if selection is not None:
             self.x = x[selection]
@@ -33,7 +33,18 @@ class ERF():
 
         self.p0.update(p0)
 
-        self.doFit()
+        try:
+            self.doFit()
+        except RuntimeError as e:
+            if debug:
+                import matplotlib.pyplot as plt
+
+                plt.plot(x, y)
+                plt.plot(x, self.model()(x, **self.p0), 'k--', label='p0')
+
+                plt.show()
+
+            raise e
 
     def doFit(self):
         p0 = [self.p0[param] for param in self.PARAMETERS]
