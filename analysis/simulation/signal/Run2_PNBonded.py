@@ -41,7 +41,7 @@ class Run2_PNNModel(ChargePropagation_1D.Model):
         print(f'Depletion Width: {Wdep*1e6} um')
 
     def Ew(self, x):
-        return self._W
+        return 1/self._W
 
     def v(self, x, charge):
         E = self._E(x)
@@ -49,8 +49,8 @@ class Run2_PNNModel(ChargePropagation_1D.Model):
         # Use saturating mobility model
         mu = x*0.0
 
-        mu[charge > 0] = self._hSat(self._T, np.abs(E))
-        mu[charge < 0] = self._eSat(self._T, np.abs(E))
+        mu[charge > 0] = self._hSat(self._T, np.abs(E[charge > 0]))
+        mu[charge < 0] = self._eSat(self._T, np.abs(E[charge < 0]))
 
         return E*mu*np.sign(charge)
 
