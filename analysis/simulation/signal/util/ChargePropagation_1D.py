@@ -1,4 +1,3 @@
-import pandas as pd
 import numpy as np
 
 from .signal import SignalExtensible
@@ -38,7 +37,8 @@ class ChargePropagation_1D():
             raise Exception('No valid model set!')
 
         # Create the charge data DataFrame
-        charge_data = pd.DataFrame([(x, q, 0.0) for x, q in charges], columns=['pos', 'q', 'v'])
+        charge_pos = np.array([x for x, q in charges])
+        charge_q = np.array([q for x, q in charges])
 
         t_curr = 0
         t_report = 0
@@ -62,9 +62,9 @@ class ChargePropagation_1D():
             #     t_report = t_curr
 
             # Calculate all veloities
-            charge_data['v'] = self._model.v(charge_data['pos'], charge_data['q'])
+            charge_v = self._model.v(charge_pos, charge_q)
 
-            max_v = np.max(np.abs(charge_data['v']))
+            max_v = np.max(np.abs(charge_v))
 
             # Stop the simulation when all charges stopped
             if max_v == 0:
@@ -81,17 +81,17 @@ class ChargePropagation_1D():
                 dt = self.dt_max
 
             # Calculate induced current
-            Iind = charge_data['q']*charge_data['v']*self._model.Ew(charge_data['pos'])
-            e_signal.add(t_curr, np.sum(Iind[charge_data['q'] < 0]))
-            h_signal.add(t_curr, np.sum(Iind[charge_data['q'] > 0]))
+            Iind = charge_q*charge_v*self._model.Ew(charge_pos)
+            e_signal.add(t_curr, np.sum(Iind[charge_q < 0]))
+            h_signal.add(t_curr, np.sum(Iind[charge_q > 0]))
 
             # Propagate all charges
-            charge_data['pos'] = charge_data['pos'] + charge_data['v']*dt
+            charge_pos = charge_pos + charge_v*dt
 
             # Remove charges outside of boundaries
-            outside = (charge_data['pos'] >= self.x_range[1]) | (charge_data['pos'] <= self.x_range[0])
-            charge_data.loc[outside, 'v'] = 0
-            charge_data.loc[outside, 'q'] = 0
+            outside = (charge_pos >= self.x_range[1]) | (charge_pos <= self.x_range[0])
+            charge_v[outside] = 0
+            charge_q[outside] = 0
 
             t_curr += dt
 
