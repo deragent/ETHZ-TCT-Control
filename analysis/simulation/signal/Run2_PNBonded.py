@@ -29,13 +29,20 @@ class Run2_PNNModel(ChargePropagation_1D.Model):
             def Efield(x):
                 E = pc.e0*Na/pc.Si.eps*(Wdep - x)
                 E[x <= Wdep] = 0.0
+
+                E[x < -Wp] = 0.0
+                E[x > 0] = 0.0
                 return E
 
         else:
             Wdep = -Wp
             def Efield(x):
                 E0 = -1*(Vbias - Vdep)/Wp
-                return E0 + pc.e0*Na/pc.Si.eps*(-1*Wp - x)
+                E = E0 + pc.e0*Na/pc.Si.eps*(-1*Wp - x)
+
+                E[x < -Wp] = 0.0
+                E[x > 0] = 0.0
+                return E
 
         self._E = Efield
         print(f'Depletion Width: {Wdep*1e6} um')
