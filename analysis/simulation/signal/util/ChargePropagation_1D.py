@@ -12,6 +12,9 @@ class ChargePropagation_1D():
         def v(self, x, charge):
             raise NotImplementedError()
 
+        def update(self, t):
+            pass
+
 
     def __init__(self):
 
@@ -57,6 +60,8 @@ class ChargePropagation_1D():
 
         # Run the main simulation loop
         while t_curr <= self.t_end:
+            self._model.update(t_curr)
+
             # if self.dt_report > 0 and t_curr >= t_report + self.dt_report:
             #     print(f'{t_curr*1e9:.1f} ns:\t{e_signal.samples()} samples')
             #     t_report = t_curr

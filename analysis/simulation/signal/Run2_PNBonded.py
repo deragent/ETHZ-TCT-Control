@@ -54,6 +54,8 @@ class Run2_PNNModel(ChargePropagation_1D.Model):
 
         return E*mu*np.sign(charge)
 
+    def update(self, t):
+        pass
 
 def createChargePropagationSimulation(Vbias, T=pc.T0C+26, Na=4.5e17, Wp=503e-6, Wn=490e-6):
 
