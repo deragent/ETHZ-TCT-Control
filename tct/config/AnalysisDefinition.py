@@ -2,6 +2,7 @@ from .Definition import KEY_MAP
 
 class AnalysisDefinition():
 
+    TYPE_HIST = 'HIST'
     TYPE_2D = '2D'
     TYPE_3D = '3D'
 
@@ -56,13 +57,18 @@ class AnalysisDefinition():
         self.definition = definition
 
         self.plot = self.mapKey(self._get('plot', required=True))
-        self.x = self.mapKey(self._get('x', required=True))
 
-        if 'y' in definition:
-            self.y = self.mapKey(self._get('y', required=True))
-            self.type = AnalysisDefinition.TYPE_3D
+        if 'x' in definition:
+            self.x = self.mapKey(self._get('x', required=True))
+
+            if 'y' in definition:
+                self.y = self.mapKey(self._get('y', required=True))
+                self.type = AnalysisDefinition.TYPE_3D
+            else:
+                self.type = AnalysisDefinition.TYPE_2D
+
         else:
-            self.type = AnalysisDefinition.TYPE_2D
+            self.type = AnalysisDefinition.TYPE_HIST
 
         groups = self._get('group', default=[])
         if not isinstance(groups, list):
@@ -112,8 +118,10 @@ class AnalysisDefinition():
 
         if self.type == self.TYPE_3D:
             return f'Plot3D_{self.x}-{self.y}VS{self.plot}'
-        else:
+        elif self.type == self.TYPE_2D:
             return f'Plot2D_{self.x}VS{self.plot}{group}_{fit}'
+        else:
+            return f'Hist_{self.plot}{group}'
 
     def title(self):
         '''Returns a human readable title for the analysis.'''
@@ -122,5 +130,7 @@ class AnalysisDefinition():
 
         if self.type == self.TYPE_3D:
             return f'{self.plot} in function of {self.x} and {self.y}'
-        else:
+        elif self.type == self.TYPE_2D:
             return f'{self.plot} in function of {self.x}'
+        else:
+            return f'Histogram of {self.plot}'
