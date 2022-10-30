@@ -178,6 +178,8 @@ if len(scanfile.analysis) > 0:
                 plot = analysis.online.Plot3D(definition, scandata)
             elif definition.type == definition.TYPE_2D:
                 plot = analysis.online.Plot2D(definition, scandata)
+            elif definition.type == definition.TYPE_HIST:
+                plot = analysis.online.PlotHist(definition, scandata)
             else:
                 log.log('SCAN', f'WARNING: Unexpected analysis type encountered [{definition.type}]')
                 continue

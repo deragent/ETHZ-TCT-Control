@@ -56,6 +56,8 @@ for definition in analysisfile.analysis:
             plot = analysis.online.Plot3D(definition, scandata)
         elif definition.type == definition.TYPE_2D:
             plot = analysis.online.Plot2D(definition, scandata)
+        elif definition.type == definition.TYPE_HIST:
+            plot = analysis.online.PlotHist(definition, scandata)
         else:
             log.log('ANALYSIS', f'WARNING: Unexpected analysis type encountered [{definition.type}]')
             continue
