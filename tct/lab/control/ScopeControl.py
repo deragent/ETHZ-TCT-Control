@@ -181,15 +181,16 @@ class ScopeControl():
                 break
             self.log('Scope', 'Still waiting for a trigger.')
 
-        self.scope.TriggerMode(WaveRunner8104.TRIGGER_MODE.NORMAL)
+        if num_average > 1:
+            self.scope.TriggerMode(WaveRunner8104.TRIGGER_MODE.NORMAL)
 
-        self.log('Scope', f'Waiting for {num_average} sweeps.')
+            self.log('Scope', f'Waiting for {num_average} sweeps.')
 
-        while 1:
-            sweeps = self.scope.GetSweeps(self.CH)
-            if sweeps >= num_average:
-                break
-            time.sleep(0.01)
+            while 1:
+                sweeps = self.scope.GetSweeps(self.CH)
+                if sweeps >= num_average:
+                    break
+                time.sleep(0.01)
 
         return self._readWaveform()
 
