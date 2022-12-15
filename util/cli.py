@@ -306,3 +306,7 @@ while 1:
         handleView(commands[1:])
 
 ## TODO handle safe shutdown if wanted
+
+if viewer is not None:
+    viewer.terminate()
+    viewer = None
