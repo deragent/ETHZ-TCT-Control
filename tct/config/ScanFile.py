@@ -3,7 +3,7 @@ import numpy as np
 
 from ..system import Scan
 from .ConfigFile import ConfigFile
-from .Definition import SETUP_KEYS
+from .Definition import SETUP_KEYS, MODE
 from .AnalysisDefinition import AnalysisDefinition
 
 class ScanFile(ConfigFile):
@@ -20,6 +20,7 @@ class ScanFile(ConfigFile):
         super().__init__(file)
 
         # Load all the data - This also verifies the file
+        self.mode = self._getMode()
         self.meta = self._getMeta()
         self.limits = self._getLimits()
         self.setup = self._getSetup()
@@ -27,6 +28,10 @@ class ScanFile(ConfigFile):
         self.end = self._getEnd()
         self.getScan()
         self.analysis = self._getAnalysis()
+
+    def _getMode(self):
+        mode = self._get(['mode'], required=False)
+        return MODE(mode)
 
 
     def _getMeta(self):
