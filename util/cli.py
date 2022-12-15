@@ -23,6 +23,8 @@ parser.add_argument('--vlimit', '-V', type=float, required=True,
                     help='Voltage limit for the high-voltage PSU [V].')
 parser.add_argument('--ilimit', '-I', type=float, required=True,
                     help='Current limit for the high-voltage PSU [mA].')
+parser.add_argument('--no-laser', dest='laser', action='store_false',
+                    help='Do not use the laser - For source type operations!')
 
 args = parser.parse_args()
 
@@ -38,15 +40,7 @@ if np.abs(args.ilimit) > 20:
 # Create a logger
 log = Logger('.tct_cli.log', print=True, debug=False)
 
-
-command_completer = pt.completion.NestedCompleter.from_nested_dict({
-    'laser': {
-        'on': None,
-        'off': None,
-        'dac': None,
-        'frequency': None,
-        'state': None,
-    },
+command_dict = {
     'amp': {
         'on': None,
         'off': None,
@@ -83,11 +77,21 @@ command_completer = pt.completion.NestedCompleter.from_nested_dict({
     'off': None,
     'exit': None,
     'quit': None,
-})
+}
+if args.laser:
+    command_dict['laser'] = {
+        'on': None,
+        'off': None,
+        'dac': None,
+        'frequency': None,
+        'state': None,
+    }
+command_completer = pt.completion.NestedCompleter.from_nested_dict(command_dict)
 
 ## Setup the environment
 stage = StageControl(log = log)
-laser = ParticularsLaserControl(log = log)
+if args.laser:
+    laser = ParticularsLaserControl(log = log)
 amp = ParticularsAmplifierControl(log = log)
 bias = BiasSupplyControl(VLimit = args.vlimit, ILimit = args.ilimit*1e-3, log = log)
 temp = TemperatureControl(log = log)
@@ -95,32 +99,32 @@ temp = TemperatureControl(log = log)
 
 ## TODO add status rprompt
 
-
-def handleLaser(input):
-    if input[0] in ['on']:
-        laser.LaserOn()
-    elif input[0] in ['off']:
-        laser.LaserOff()
-    elif input[0] in ['state']:
-        print('= ', laser.LaserState())
-    elif input[0] in ['dac']:
-        if len(input) < 2:
-            dac = laser.LaserGetDAC()
-            if dac is not None:
-                print(f'= {dac}')
+if args.laser:
+    def handleLaser(input):
+        if input[0] in ['on']:
+            laser.LaserOn()
+        elif input[0] in ['off']:
+            laser.LaserOff()
+        elif input[0] in ['state']:
+            print('= ', laser.LaserState())
+        elif input[0] in ['dac']:
+            if len(input) < 2:
+                dac = laser.LaserGetDAC()
+                if dac is not None:
+                    print(f'= {dac}')
+                else:
+                    print('= NA')
             else:
-                print('= NA')
-        else:
-            laser.LaserSetDAC(int(input[1]))
-    elif input[0] in ['frequency', 'freq']:
-        if len(input) < 2:
-            freq = laser.LaserGetFrequency()
-            if freq is not None:
-                print(f'= {freq/1000:.2f} kHz')
+                laser.LaserSetDAC(int(input[1]))
+        elif input[0] in ['frequency', 'freq']:
+            if len(input) < 2:
+                freq = laser.LaserGetFrequency()
+                if freq is not None:
+                    print(f'= {freq/1000:.2f} kHz')
+                else:
+                    print('= NA')
             else:
-                print('= NA')
-        else:
-            laser.LaserSetFrequency(int(float(input[1])))
+                laser.LaserSetFrequency(int(float(input[1])))
 
 def handleAmp(input):
     if input[0] in ['on']:
@@ -270,17 +274,19 @@ while 1:
             text='Do you want to turn all components off?'
         ).run()
         if result:
-            laser.LaserOff()
+            if args.laser:
+                laser.LaserOff()
             bias.SMUOff()
             amp.AmpOff()
 
         continue
     elif commands[0] in ['on']:
-        if laser.LaserGetFrequency() is None:
-            laser.LaserSetFrequency(50e3)
-        if laser.LaserGetDAC() is None:
-            laser.LaserSetDAC(290)
-        laser.LaserOn()
+        if args.laser:
+            if laser.LaserGetFrequency() is None:
+                laser.LaserSetFrequency(50e3)
+            if laser.LaserGetDAC() is None:
+                laser.LaserSetDAC(290)
+            laser.LaserOn()
         amp.AmpOn()
         bias.SMUOn()
 
@@ -290,7 +296,7 @@ while 1:
         printError('Missing arguments!')
         continue
 
-    if commands[0] in ['laser']:
+    if args.laser and commands[0] in ['laser']:
         handleLaser(commands[1:])
     elif commands[0] in ['amp', 'amplifier']:
         handleAmp(commands[1:])
