@@ -69,12 +69,13 @@ if args.confirm and not args.batch:
         sys.exit(-1)
 
 # Create the setup and load the initial state
-setup = Setup(vlimit = scanfile.limits['vlimit'], ilimit = scanfile.limits['ilimit'], log=log)
+setup = Setup(vlimit = scanfile.limits['vlimit'], ilimit = scanfile.limits['ilimit'], log=log, use_laser=scanfile.mode.laser())
 setup.FromState(scanfile.setup)
 
 setup.amp.AmpOn()
 setup.bias.SMUOn()
-setup.laser.LaserOn()
+if scanfile.mode.laser():
+    setup.laser.LaserOn()
 
 # TODO: Handle Scope Setup
 
@@ -119,6 +120,10 @@ for ee, scan_entry in enumerate(scan):
             setup.scope.AutoScale()
 
         wave = setup.scope.AcquireAverage()
+
+        # This is a hack, to obtain a similar trigger time also for source measurements
+        if scanfile.mode.source():
+            wave.x += 20e-9
 
         # Store the metadata and acquired curve
         state = setup.ToState()

@@ -9,7 +9,7 @@ from tct.logger import Logger
 
 class Setup():
 
-    def __init__(self, vlimit, ilimit, log=None):
+    def __init__(self, vlimit, ilimit, log=None, use_laser=True):
 
         if log is None:
             self.log = Logger(print=True, debug=False)
@@ -40,7 +40,10 @@ class Setup():
 
         # Create the setup control classes
         self.stage = StageControl(log = self.log)
-        self.laser = ParticularsLaserControl(log = self.log)
+        if use_laser:
+            self.laser = ParticularsLaserControl(log = self.log)
+        else:
+            self.laser = None
         self.amp = ParticularsAmplifierControl(log = self.log)
         self.bias = BiasSupplyControl(VLimit = vlimit, ILimit = ilimit, log = self.log)
         self.scope = ScopeControl(log = self.log)
@@ -52,7 +55,8 @@ class Setup():
 
         self.scope.ToState(state)
         self.stage.ToState(state)
-        self.laser.ToState(state)
+        if self.laser is not None:
+            self.laser.ToState(state)
         self.amp.ToState(state)
         self.bias.ToState(state)
         self.temp.ToState(state)
@@ -65,7 +69,8 @@ class Setup():
     def FromState(self, state):
         self.scope.FromState(state)
         self.stage.FromState(state)
-        self.laser.FromState(state)
+        if self.laser is not None:
+            self.laser.FromState(state)
         self.amp.FromState(state)
         self.bias.FromState(state)
         self.temp.FromState(state)
@@ -78,6 +83,7 @@ class Setup():
                 self._manual[key] = value
 
     def Off(self):
-        self.laser.LaserOff()
+        if self.laser is not None:
+            self.laser.LaserOff()
         self.bias.SMUOff()
         self.amp.AmpOff()
