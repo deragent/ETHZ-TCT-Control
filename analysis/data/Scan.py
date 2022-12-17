@@ -68,6 +68,12 @@ class Scan():
             df = pd.DataFrame.from_dict(self._cache, orient='index', columns=['cache'])
             df.to_csv(self.meta / '.fct.cache')
 
+    def log(self):
+        try:
+            with open(self.folder / 'log.log', 'r') as stream:
+                return stream.read()
+        except FileNotFoundError as e:
+            return ''
 
     def info(self):
         with open(self.meta / 'info.yaml', 'r') as stream:
