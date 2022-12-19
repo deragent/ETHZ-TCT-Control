@@ -121,9 +121,10 @@ for ee, scan_entry in enumerate(scan):
 
         wave = setup.scope.AcquireAverage()
 
-        # This is a hack, to obtain a similar trigger time also for source measurements
-        if scanfile.mode.source():
-            wave.x += 20e-9
+        # This allows to shift the trigger (t=0) point.
+        # Allows to make the pulse more uniform in time between laser and source measurements
+        if scanfile.delay != 0:
+            wave.x += scanfile.delay
 
         # Store the metadata and acquired curve
         state = setup.ToState()

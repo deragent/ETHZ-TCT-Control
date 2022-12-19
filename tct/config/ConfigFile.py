@@ -47,7 +47,7 @@ class ConfigFile():
         return shutil.copy(self._file, file)
 
 
-    def _get(self, keys, required=False):
+    def _get(self, keys, required=False, default=None):
         if not isinstance(keys, list):
             keys = [keys]
 
@@ -57,7 +57,7 @@ class ConfigFile():
                 if required:
                     raise ConfigFile.MissingError(self, keys[:kk+1])
                 else:
-                    return None
+                    return default
 
             root = root[key]
 

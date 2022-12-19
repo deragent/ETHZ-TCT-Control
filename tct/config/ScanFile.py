@@ -21,6 +21,7 @@ class ScanFile(ConfigFile):
 
         # Load all the data - This also verifies the file
         self.mode = self._getMode()
+        self.delay = self._getDelay()
         self.meta = self._getMeta()
         self.limits = self._getLimits()
         self.setup = self._getSetup()
@@ -32,6 +33,10 @@ class ScanFile(ConfigFile):
     def _getMode(self):
         mode = self._get(['mode'], required=False)
         return MODE(mode)
+
+    def _getDelay(self):
+        delay = float(self._get(['delay'], required=False, default=0.0))
+        return delay
 
 
     def _getMeta(self):
