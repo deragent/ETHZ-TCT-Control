@@ -67,6 +67,7 @@ if args.confirm and not args.batch:
 
 
 # Create the list of bias_voltages
+# TODO fix proper calculation, honouring step, and changing scan_voltage if necessary!
 bias_voltages = np.linspace(0.0, args.scan_voltage, int(args.scan_voltage/args.scan_step)+1)
 leakage_current = np.zeros((len(bias_voltages), args.measurements))
 
