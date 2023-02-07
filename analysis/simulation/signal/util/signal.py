@@ -1,5 +1,6 @@
 import numpy as np
 import scipy.interpolate
+import scipy.signal
 
 class Signal():
 
@@ -77,3 +78,10 @@ class SignalEven(Signal):
         signal_filter = signal_filter*gain
 
         return SignalEven(self._tstart, self._dt, signal_filter)
+
+    def convolve(self, v):
+        signal = scipy.signal.convolve(self.signal(), v, mode='full', method='direct')
+
+        signal = signal[0:len(self.signal())]
+
+        return SignalEven(self._tstart, self._dt, signal)
