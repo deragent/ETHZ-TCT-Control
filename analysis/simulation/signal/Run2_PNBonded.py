@@ -11,6 +11,8 @@ class Run2_PNNModel(ChargePropagation_1D.Model):
 
     def __init__(self, Vbias, T, Na, Wp, Wn):
 
+        self._Wp = Wp
+        self._Wn = Wn
         self._W = Wp + Wn
         self._Vbias = Vbias
         self._T = T
@@ -46,6 +48,17 @@ class Run2_PNNModel(ChargePropagation_1D.Model):
 
         self._E = Efield
         print(f'Depletion Width: {Wdep*1e6} um')
+
+        self._Vdep = Vdep
+        self._Wdep = np.abs(Wdep)
+
+    @property
+    def VDepletion(self):
+        return self._Vdep
+
+    @property
+    def WDepletion(self):
+        return self._Wdep
 
     def Ew(self, x):
         return 1/self._W
