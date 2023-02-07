@@ -66,7 +66,7 @@ class SignalEven(Signal):
             if self._tstart != o._tstart or self._dt != o._dt:
                 raise Exception('Can not add two signals with different time sampling!')
 
-            return SignalEvent(self._tstart, self._dt, self.signal() + o.signal())
+            return SignalEven(self._tstart, self._dt, self.signal() + o.signal())
         else:
             super().__add__(o)
 
