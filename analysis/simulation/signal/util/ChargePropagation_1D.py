@@ -15,6 +15,8 @@ class ChargePropagation_1D():
         def update(self, t):
             pass
 
+        def post(self, signal):
+            return signal
 
     def __init__(self):
 
@@ -106,9 +108,14 @@ class ChargePropagation_1D():
             e_signal.add(self.t_end, 0)
             h_signal.add(self.t_end, 0)
 
-        total = e_signal + h_signal
-
         if retEH:
+            e_signal = self._model.post(e_signal)
+            h_signal = self._model.post(h_signal)
+
+            total = e_signal + h_signal
+
             return total, e_signal, h_signal
         else:
-            return total
+            total = e_signal + h_signal
+
+            return self._model.post(total)
