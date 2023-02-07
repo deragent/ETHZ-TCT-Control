@@ -74,7 +74,7 @@ class ChargePropagation_1D():
             max_v = np.max(np.abs(charge_v))
 
             # Stop the simulation when all charges stopped
-            if max_v == 0:
+            if max_v < 1:
                 e_signal.add(t_curr, 0)
                 h_signal.add(t_curr, 0)
                 break
